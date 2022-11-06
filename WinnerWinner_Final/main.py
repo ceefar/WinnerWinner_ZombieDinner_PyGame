@@ -6,6 +6,7 @@ from zombie import *
 from settings import *
 from sprites import *
 from tilemap import *
+from lootable import Lootable
 from player import Player
 
 # HUD functions
@@ -94,8 +95,10 @@ class Game:
             s = pg.mixer.Sound(path.join(snd_folder, snd))
             s.set_volume(self.game_volume)
             self.zombie_hit_sounds.append(s) 
+        # -- misc --
+        self.draw_debug = False
+        # -- load fonts --
         # [ TODO! ] to make as incrementally function shortly
-        # load fonts
         self.FONT_SILK_REGULAR_10 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 10) 
         self.FONT_SILK_REGULAR_12 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 12)
         self.FONT_SILK_REGULAR_14 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 14)
@@ -104,15 +107,37 @@ class Game:
         self.FONT_SILK_REGULAR_22 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 22)
         self.FONT_SILK_REGULAR_24 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 24)
         self.FONT_SILK_REGULAR_32 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 32)
+        # -- additional images to be sectioned into associated lists or functions for incremental loading --
+        self.lootbox_small_1_img = pg.image.load(path.join(img_folder, LOOT_BOX_1_IMG)).convert_alpha()
+        self.lootbox_small_2_img = pg.image.load(path.join(img_folder, LOOT_BOX_2_IMG)).convert_alpha()
+        self.lootbox_small_3_img = pg.image.load(path.join(img_folder, LOOT_BOX_3_IMG)).convert_alpha()
+        self.lootbox_small_4_img = pg.image.load(path.join(img_folder, LOOT_BOX_4_IMG)).convert_alpha()
+        self.lootbox_small_5_img = pg.image.load(path.join(img_folder, LOOT_BOX_5_IMG)).convert_alpha()
+        self.lootbox_small_6_img = pg.image.load(path.join(img_folder, LOOT_BOX_6_IMG)).convert_alpha()
+        # testing resize quickly
+        self.lootbox_small_1_img = pg.transform.scale(self.lootbox_small_1_img, (38, 38))
+        self.lootbox_small_2_img = pg.transform.scale(self.lootbox_small_2_img, (38, 38))
+        self.lootbox_small_3_img = pg.transform.scale(self.lootbox_small_3_img, (38, 38))
+        self.lootbox_small_4_img = pg.transform.scale(self.lootbox_small_4_img, (38, 38))
+        self.lootbox_small_5_img = pg.transform.scale(self.lootbox_small_5_img, (38, 38))
+        self.lootbox_small_6_img = pg.transform.scale(self.lootbox_small_6_img, (38, 38))
+        # larger versions
+        self.lootbox_small_1_large_img = pg.transform.scale(self.lootbox_small_1_img, (54, 54))
+        self.lootbox_small_2_large_img = pg.transform.scale(self.lootbox_small_2_img, (54, 54))
+        self.lootbox_small_3_large_img = pg.transform.scale(self.lootbox_small_3_img, (54, 54))
+        self.lootbox_small_4_large_img = pg.transform.scale(self.lootbox_small_4_img, (54, 54))
+        self.lootbox_small_5_large_img = pg.transform.scale(self.lootbox_small_5_img, (54, 54))
+        self.lootbox_small_6_large_img = pg.transform.scale(self.lootbox_small_6_img, (54, 54))
 
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pg.sprite.LayeredUpdates()
         self.walls = pg.sprite.Group()
-        self.mobs = pg.sprite.Group()
+        self.zombies = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.items = pg.sprite.Group()
-        self.map = TiledMap(path.join(self.map_folder, 'level_large.tmx')) # level_large level1.tmx
+        self.lootables = pg.sprite.Group()
+        self.map = TiledMap(path.join(self.map_folder, 'level_large.tmx'))
         self.map_img = self.map.make_map()
         self.map.rect = self.map_img.get_rect()
         for tile_object in self.map.tmxdata.objects:
@@ -127,8 +152,9 @@ class Game:
                          tile_object.width, tile_object.height)
             if tile_object.name in ['health', 'shotgun']:
                 Item(self, obj_center, tile_object.name)
+            if tile_object.name == 'lootable_box_small': 
+                Lootable(self, obj_center.x, obj_center.y, tile_object.name)                
         self.camera = Camera(self.map.width, self.map.height)
-        self.draw_debug = False
         self.paused = False
         self.night = False
         if self.game_volume > 0:
@@ -154,7 +180,7 @@ class Game:
         self.all_sprites.update()
         self.camera.update(self.player)
         # -- game over man --
-        if len(self.mobs) == 0:
+        if len(self.zombies) == 0:
             self.playing = False
         # -- collision : player > items --
         hits = pg.sprite.spritecollide(self.player, self.items, False)
@@ -170,7 +196,7 @@ class Game:
                 if self.game_volume > 0:
                     self.effects_sounds['gun_pickup'].play()
         # -- collision : player > zombies --
-        hits = pg.sprite.spritecollide(self.player, self.mobs, False, collide_hit_rect)
+        hits = pg.sprite.spritecollide(self.player, self.zombies, False, collide_hit_rect)
         for hit in hits:
             if self.game_volume > 0:
                 if random() < 0.7:
@@ -183,7 +209,7 @@ class Game:
             self.player.hit()
             self.player.pos += vec(MOB_KNOCKBACK, 0).rotate(-hits[0].rot)
         # -- collision [group] : zombies > bullets [deleted] --
-        hits = pg.sprite.groupcollide(self.mobs, self.bullets, False, True)
+        hits = pg.sprite.groupcollide(self.zombies, self.bullets, False, True)
         for mob in hits:
             # hit.health -= WEAPONS[self.player.weapon]['damage'] * len(hits[hit])
             for bullet in hits[mob]:
@@ -209,6 +235,18 @@ class Game:
         self.screen.blit(self.map_img, self.camera.apply(self.map))
         # self.draw_grid()
         for sprite in self.all_sprites:
+            
+            if isinstance(sprite, Lootable):
+                player_distance = (sprite.pos - self.player.pos).length()
+                # if the player is near a lootable, highlight the lootable
+                if player_distance < 90:      
+                    sprite.draw_lootable_info()
+                    sprite.draw_lil_line()
+                    if sprite.can_player_open():
+                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=GREEN)  
+                    else:
+                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=RED) 
+                    sprite.draw_lootable_info()
             if isinstance(sprite, Zombie):
                 sprite.draw_unit_health()   
                 sprite.draw_unit_name()
@@ -224,7 +262,7 @@ class Game:
             self.render_fog()
         # HUD functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
-        self.draw_text('Zombies: {}'.format(len(self.mobs)), self.hud_font, 30, WHITE,
+        self.draw_text('Zombies: {}'.format(len(self.zombies)), self.hud_font, 30, WHITE,
                        WIDTH - 10, 10, align="topright")
         if self.paused:
             self.screen.blit(self.dim_screen, (0, 0))
@@ -290,3 +328,4 @@ while True:
     g.new()
     g.run()
     g.show_go_screen()
+

@@ -8,7 +8,7 @@ vec = pg.math.Vector2
 class Zombie(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self._layer = MOB_LAYER
-        self.groups = game.all_sprites, game.mobs
+        self.groups = game.all_sprites, game.zombies
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         # -- object shapes and images --
@@ -28,7 +28,7 @@ class Zombie(pg.sprite.Sprite):
         # -- practically finalised --
         self.vision_detect_radius = 300
         self.my_name = self.get_first_name()
-        self.my_id = len(self.game.mobs) + 1
+        self.my_id = len(self.game.zombies) + 1
         # -- power level & experience --
         self.power_level = self.set_power_level() # important! => starting health is reliant on power_level
         # -- health --
@@ -38,11 +38,9 @@ class Zombie(pg.sprite.Sprite):
         self.current_health = self.max_health     
         # -- status and other ui --
         self.my_status = self.get_status()
-        
-    # -- OG --
 
-    def avoid_mobs(self):
-        for mob in self.game.mobs:
+    def avoid_zombies(self):
+        for mob in self.game.zombies:
             if mob != self:
                 dist = self.pos - mob.pos
                 if 0 < dist.length() < AVOID_RADIUS:
@@ -57,7 +55,7 @@ class Zombie(pg.sprite.Sprite):
             self.image = pg.transform.rotate(self.game.mob_img, self.rot)
             self.rect.center = self.pos
             self.acc = vec(1, 0).rotate(-self.rot)
-            self.avoid_mobs()
+            self.avoid_zombies()
             self.acc.scale_to_length(self.speed)
             self.acc += self.vel * -1
             self.vel += self.acc * self.game.dt
@@ -194,7 +192,7 @@ class Zombie(pg.sprite.Sprite):
 
     def handle_hp_bar_alpha(self):
         ...        
-        # if self.my_id in self.game.clumping_mobs:
+        # if self.my_id in self.game.clumping_zombies:
         #     s.set_alpha(50)    
         # else:
         #     s.set_alpha(255) 

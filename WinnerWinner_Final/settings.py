@@ -128,7 +128,15 @@ EFFECTS_SOUNDS = {'level_start': 'level_start.wav',
 MOB_HEALTH_BAR_LENGTH, MOB_HEALTH_BAR_HEIGHT = 100, 16
 HP_BAR_HP_SEGMENT = 50 # for strips between bars, serves to indicate a block/chunk of hp and ** not ** relative to the bar length
 
-# Generalised Handy Functions
+# Lootables
+LOOT_BOX_1_IMG = 'lootable_box_1.png'
+LOOT_BOX_2_IMG = 'lootable_box_2.png'
+LOOT_BOX_3_IMG = 'lootable_box_3.png'
+LOOT_BOX_4_IMG = 'lootable_box_4.png'
+LOOT_BOX_5_IMG = 'lootable_box_5.png'
+LOOT_BOX_6_IMG = 'lootable_box_6.png'
+
+# General Handy Stuff
 def round_to_base(x, base=5): 
     """ defaults to 5 """
     return base * round(x/base)
