@@ -131,6 +131,7 @@ class Game:
 
     def new(self):
         # initialize all variables and do all the setup for a new game
+        self.all_map_lootables = {} # includes loot details for each lootable
         self.all_sprites = pg.sprite.LayeredUpdates()
         self.walls = pg.sprite.Group()
         self.zombies = pg.sprite.Group()
@@ -159,7 +160,7 @@ class Game:
         self.night = False
         if self.game_volume > 0:
             self.effects_sounds['level_start'].play()
-
+        
     def run(self):
         # game loop - set self.playing = False to end the game
         self.playing = True

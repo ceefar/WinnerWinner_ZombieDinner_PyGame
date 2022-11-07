@@ -19,6 +19,8 @@ from random import randint, choice, choices
 
 # obvs chunk up this init into relevant functions once got it all wrapped up
 class Lootable(pg.sprite.Sprite):
+    loot_counter = 0 # for counting every individual piece of loot created at any given lootable
+
     def __init__(self, game, x, y, type):
         # -- general setup --
         self._layer = ITEMS_LAYER # need to sort the layering for this and the menus tbf, likely own layer
@@ -41,7 +43,7 @@ class Lootable(pg.sprite.Sprite):
         # needed before everything else         
         self.rarities = {"trash":{"diff_buffer":400, "colour":TAN},"basic":{"diff_buffer":320, "colour":SKYBLUE},"uncommon":{"diff_buffer":25, "colour":LIME},"fancy":{"diff_buffer":20, "colour":PURPLE},"uber-rare":{"diff_buffer":15, "colour":BLUEGREEN},"epic":{"diff_buffer":10, "colour":YELLOW},"legendary":{"diff_buffer":5, "colour":MAGENTA},"god-tier":{"diff_buffer":0, "colour":CYAN}}
         self.rarity = choices(list(self.rarities.keys()), weights=[8,15,12,10,5,3,2,1], k=1)[0] # returns a list so just set it to the 0 index here so we get just the string
-        self.rarity_int = list(self.rarities.keys()).index(self.rarity) # of 8, zero indexed (so 7)
+        self.rarity_int = list(self.rarities.keys()).index(self.rarity) + 1 # of 8, zero indexed (so 7), so + 1
         self.rarity_colour = self.get_rarity_colour()
         # we also use the size to confirm which type of loot to get so we need to do this first too
         self.my_size = randint(1,6) # actually decided to keep size completely random and not reliant on other variables (as was considering direct rarity relationship)
@@ -55,7 +57,10 @@ class Lootable(pg.sprite.Sprite):
                     if self.my_size >= lootbox_config["size_range"][0] and self.my_size <= lootbox_config["size_range"][1]:
                         potential_lootboxes.append(lootbox_config)
             # -- set the base vars from the returned dict, e.g. image, size, type, i.e. lunchbox, toolbox, etc, etc --
-            selected_lootbox_info = self.get_lootbox_image_and_type(potential_lootboxes)
+            try:
+                selected_lootbox_info = self.get_lootbox_image_and_type(potential_lootboxes)
+            except IndexError as ndxErr:
+                print(f"{ndxErr}\n{self.my_size}, {self.rarity_int}")
             if self.my_size >= 5:
                 self.image = selected_lootbox_info["lrg_image"]
             else:
@@ -119,24 +124,13 @@ class Lootable(pg.sprite.Sprite):
     def get_rarity_colour(self): 
         return self.rarities[self.rarity]["colour"]                
 
-
-    # -- in progress --
-    def get_a_loot(self):
-        loot_list = []
-        for _ in range(self.my_size):
-            loot_list.append(self.loot_maker(choice(["Baby Gold", "Basic Gold", "Uber Gold", "Nada", "Epic Item", "HP Medkit", "HP Food", "Ammo"])))       
-        # print(f"{loot_list = }")
-        return loot_list
-    
-
     def draw_lil_line(self):
         start_rect = pg.Rect(self.pos.x, self.pos.y, 10, 10)
         start_rect = self.game.camera.apply_rect(start_rect)
-        end_rect = pg.Rect(self.title_destination.x - 2, self.title_destination.y - self.info_box_info_surf.get_height(), 2, 2) 
-        # GREEN if self.can_player_open() else RED
-        pg.draw.line(self.game.screen, BLUEMIDNIGHT, start_rect.center, end_rect.center, 3) # LIGHTGREY # BLUEMIDNIGHT # self.title_destination.topleft
+        end_rect = pg.Rect(self.title_destination.x - 2, self.title_destination.y - self.info_box_info_surf.get_height(), 2, 2)         
+        pg.draw.line(self.game.screen, BLUEMIDNIGHT, start_rect.center, end_rect.center, 3) # self.title_destination.topleft
 
-    # taken fron draw_unit_status, worked as expected tbf but just need to heavily customise this
+    # -- to refactor / optimise --
     def draw_lootable_info(self): 
         x, y = self.pos.x, self.pos.y 
         self.padding_x, self.padding_y = 20, 14
@@ -182,10 +176,7 @@ class Lootable(pg.sprite.Sprite):
             chargebar_text = self.chargebar_failure_text
         if pct >= 100:
             pct = 100
-            if self.can_player_open():
-                chargebar_text = f"- open"
-            else:
-                chargebar_text = f"- oof"
+            chargebar_text = f"- open" if self.can_player_open() else f"- oof"
         # actual bar
         chargebar_surf = pg.Surface(((self.info_box_info_surf.get_width() / 100) * pct, self.info_box_info_surf.get_height()))
         chargebar_surf.fill(ORANGE)
@@ -194,7 +185,44 @@ class Lootable(pg.sprite.Sprite):
         chargebar_surf.blit(opening_text_surf, (int(self.padding_x/2), int(self.padding_y/2)))
         # blit
         self.game.screen.blit(chargebar_surf, self.title_destination)
-            
+
+    # -- in progress --
+    # - loot id (unique identifier)
+    # - rarity
+    # - loot type
+    #   - consumable hp
+    #   - insta hp
+    #   - gold
+    #   - buff
+    #   - ammo
+    #   - weapon
+    #   - part / collectible 
+    #   - clothing
+    #   - weapon part / upgrade
+    #   - enery drink (is a buff ig?)
+    #   - else?
+    #   - battery / phone ? (maybe u have to charge it tho ooo)
+    # - loot value
+    # - position / rect position / array position / which inventory ?
+
+    def create_a_new_loot(self):
+        for _ in range(self.my_size):
+            Lootable.loot_counter += 1
+            if self.my_id not in self.game.all_map_lootables:
+                self.game.all_map_lootables[self.my_id] = [{"loot_id":Lootable.loot_counter}]
+            else:
+                self.game.all_map_lootables[self.my_id].append({"loot_id":Lootable.loot_counter})
+        print(self.game.all_map_lootables)
+        # might need try except if list doesnt exist then define it initially
+
+    def get_a_loot(self):
+        loot_list = []
+        self.create_a_new_loot()
+        for _ in range(self.my_size):
+            loot_list.append(self.loot_maker(choice(["Baby Gold", "Basic Gold", "Uber Gold", "Nada", "Epic Item", "HP Medkit", "HP Food", "Ammo"])))       
+        # print(f"{loot_list = }")
+        return loot_list
+    
     def loot_maker(self, loot):
         # aite as this is a test guna now add what i want in final even tho it means there will be some duplication
         if "gold" in loot.lower():
