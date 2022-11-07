@@ -2,17 +2,7 @@
 from settings import *
 from random import randint, choice, choices
    
-#   - pure bosh straight into our new menu stuff
-#   - starting out being sure we have the dict all sorted properly to work flawlessly when passing n deleting
-#   - NOT OPTIONAL!!! => with attention now to undo, delete, stacking, and consuming        
-#   - remember loot needs shit like its id, rarity, type, etc
-#   - and note do want items like clothing so might be worth a quick inclusion
-#   - and even stuff i havent done yet that i want like rarity too
-#       - and a simple randomiser for the value based on rarity too 
-#       - do we then pass the box rarity, yes we must so there we go u gotta think first lol
-#       - pseudocode it pls
-
-# obvs chunk up this init into relevant functions once got it all wrapped up
+   
 class Lootable(pg.sprite.Sprite):
     loot_counter = 0 # for counting every individual piece of loot created at any given lootable
 
@@ -25,15 +15,14 @@ class Lootable(pg.sprite.Sprite):
         self.pos = vec(x, y)        
         self.my_id = len(game.lootables) + 1
         # -- lookup dictionary --
-        self.lootboxes_setup = {"small":[ # "Mini Fridge","School Backpack", "Amazon Package","Small Briefcase"
+        self.lootboxes_setup = {"small":[ # "Mini Fridge","School Backpack", "Amazon Package","Small Briefcase"...
                                             {"visual_type":"work briefcase", "image":self.game.lootbox_small_1_img, "lrg_image":self.game.lootbox_small_1_large_img, "size_range":(1,6), "rarity_range":(3,8)},
                                             {"visual_type":"luxury shopping bag", "image":self.game.lootbox_small_2_img, "lrg_image":self.game.lootbox_small_2_large_img, "size_range":(1,4), "rarity_range":(5,8)},
                                             {"visual_type":"lunchbox", "image":self.game.lootbox_small_3_img, "lrg_image":self.game.lootbox_small_3_large_img, "size_range":(1,4), "rarity_range":(1,3)},
                                             {"visual_type":"kids backpack", "image":self.game.lootbox_small_4_img, "lrg_image":self.game.lootbox_small_4_large_img, "size_range":(1,5), "rarity_range":(1,4)},
                                             {"visual_type":"toolbox", "image":self.game.lootbox_small_5_img, "lrg_image":self.game.lootbox_small_5_large_img, "size_range":(1,5), "rarity_range":(1,5)},
                                             {"visual_type":"picnic basket", "image":self.game.lootbox_small_6_img, "lrg_image":self.game.lootbox_small_6_large_img, "size_range":(1,6), "rarity_range":(1,3)}
-                                        ]
-                                }                 
+                                        ]}                 
         # -- rarity --
         # needed before everything else         
         self.rarities = {"trash":{"diff_buffer":400, "colour":TAN},"basic":{"diff_buffer":320, "colour":SKYBLUE},"uncommon":{"diff_buffer":25, "colour":LIME},"fancy":{"diff_buffer":20, "colour":PURPLE},"uber-rare":{"diff_buffer":15, "colour":BLUEGREEN},"epic":{"diff_buffer":10, "colour":YELLOW},"legendary":{"diff_buffer":5, "colour":MAGENTA},"god-tier":{"diff_buffer":0, "colour":CYAN}}
@@ -108,7 +97,9 @@ class Lootable(pg.sprite.Sprite):
         adjusted_time_difficulty = (self.game.player.lockpicking_skill_points * 100) - self.lock_diff_time # essentially the same as can player open, if it is a negative number then the player cant open it
         # print(f"{self.my_id}, {(self.game.player.lockpicking_skill_points * 100)}, {self.lock_diff_time} {adjusted_time_difficulty}")
         if self.can_player_open():            
-            return f"Shut : Open" if adjusted_time_difficulty < 50 else f"Shut : Jammed"
+            return f"Shut : {(self.lock_diff_time / 100):.1f} difficulty" if adjusted_time_difficulty < 50 else f"Jammed : {(self.lock_diff_time / 100):.1f} difficulty"
+            # return f"Shut : {adjusted_time_difficulty / 100:.1f} difficulty" if adjusted_time_difficulty < 50 else f"Jammed : {adjusted_time_difficulty / 100:.1f} difficulty"
+            # return f"Closed : Shut " if adjusted_time_difficulty < 50 else f"Closed : Jammed"
         else:
             # potentially could add ability for certain items to break `flimsy` locks, but skipping that for now
             return f"Locked Flimsy : +{(adjusted_time_difficulty // 100) * -1} exp" if adjusted_time_difficulty > -100 else f"Locked Tight : +{(adjusted_time_difficulty // 100) * -1} exp"
@@ -140,7 +131,6 @@ class Lootable(pg.sprite.Sprite):
         chargebar_surf.blit(opening_text_surf, (int(self.padding_x/2), int(self.padding_y/2)))
         # blit the charging bar with text on top
         self.game.screen.blit(chargebar_surf, self.title_destination)
-
 
     # -- to refactor / optimise --
     def draw_lootable_info(self): 

@@ -9,6 +9,33 @@ from tilemap import *
 from lootable import Lootable
 from player import Player
 
+# first
+# -
+# save to fork
+
+# -
+# then
+# -
+# new fork v1.02
+# start adding menus, loot, etc all the fun stuff
+# - rememmber c to close should still work btw
+# - get i to open independently sorted early too
+# - remember to add open text btw
+# - may be worth doing tidbits for other on screen ui now too (or maybe nah lol)
+
+# previous notes
+# - 
+#   - pure bosh straight into our new menu stuff
+#   - starting out being sure we have the dict all sorted properly to work flawlessly when passing n deleting
+#   - NOT OPTIONAL!!! => with attention now to undo, delete, stacking, and consuming        
+#   - remember loot needs shit like its id, rarity, type, etc
+#   - and note do want items like clothing so might be worth a quick inclusion
+#   - and even stuff i havent done yet that i want like rarity too
+#       - and a simple randomiser for the value based on rarity too 
+#       - do we then pass the box rarity, yes we must so there we go u gotta think first lol
+#       - pseudocode it pls
+
+
 # HUD functions
 def draw_player_health(surf, x, y, pct):
     if pct < 0:
@@ -158,7 +185,7 @@ class Game:
         self.camera = Camera(self.map.width, self.map.height)
         self.paused = False
         self.night = False
-        if self.game_volume > 0:
+        if self.game_volume > 0.0:
             self.effects_sounds['level_start'].play()
         # -- misc --
         self.current_lock_time = 0 # needs to be initialised before starting
@@ -166,7 +193,8 @@ class Game:
     def run(self):
         # game loop - set self.playing = False to end the game
         self.playing = True
-        pg.mixer.music.play(loops=-1)
+        if self.game_volume > 0.0:
+            pg.mixer.music.play(loops=-1)
         while self.playing:
             self.dt = self.clock.tick(FPS) / 1000.0  # fix for Python 2.x
             self.events()
@@ -233,46 +261,31 @@ class Game:
         self.screen.blit(self.fog, (0, 0), special_flags=pg.BLEND_MULT)
 
     def draw(self):
-        pg.display.set_caption("{:.2f}".format(self.clock.get_fps()))
-        # self.screen.fill(BGCOLOR)
+        pg.display.set_caption("{:.2f}".format(self.clock.get_fps())) # self.screen.fill(BGCOLOR)
         self.screen.blit(self.map_img, self.camera.apply(self.map))
         # self.draw_grid()
+        is_near_loot = False  # for resetting the charge meter when the player is out of range of any lootbox
         for sprite in self.all_sprites:
             # -- loop all lootboxes and draw them --
             if isinstance(sprite, Lootable):
                 player_distance = (sprite.pos - self.player.pos).length()
-                
-                # if the player is near a lootable
-                if player_distance < 90:      
-                    sprite.draw_lootable_info()
-                    
+                if player_distance < 90: # if the player is near this lootable      
+                    is_near_loot = True # for resetting the charge meter when the player is out of range of any lootbox
+                    sprite.draw_lootable_info() # draw the tiny menu to show the rarity, name, size, etc
                     if sprite.can_player_open(): # check if the player has a high enough lockpicking skill / meets any requirements to unlock this lootable
-                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=GREEN) # highlight it green if it can be opened by the player
+                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=GREEN) # highlight the lootable green if it can be opened by the player
                     else:
                         sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=RED) # else highlight it red if its locked                    
-                    if self.player.charging:
-
-
-                        # TO ACTUALLY JUST FINISH ALL IT IS IS...
-                        # - FIRST GET IT WORKING INDIVIDUALLY TO THE OTHERS 
-                        #   - SO WHEN YOU WALK AWAY IT CLOSES TING
-                        # - THEN GET IT OPENING THEN MENU
-                        #   - ENSURE HAVE C TO CLOSE
-                        # - SAVE TO FORK
-                        # - QUICKLY CHECK EVERYTHING AND CLEAN UP A TAD
-                        # - SAVE TO NEW FORK   
-                        # THEN LEGIT LEGIT ITS ALL THE NEW FUN STUFF, FULL ON LOOT AND MENUS AND TING!
-
-
-                        # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")                        
+                    if self.player.charging:          
+                        # if player is charging calculate how much they have charged for the current bar and use a chargebar on the menu to display the current unlock percent         
                         self.current_lock_time = sprite.lock_diff_time # make this a game variable so the player can access it outside of looping all instances 
                         charge_percent = (self.player.charging / sprite.lock_diff_time) * 100 # watch for possible zero div error here tho is an easy fix tbf
                         sprite.blit_chargebar(charge_percent)
+                        # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")   
                         if self.player.charging >= sprite.lock_diff_time:
                             if sprite.can_player_open():
                                 print(f"Open a bitch")
-
-                        
+                
             # -- loop all zombies and draw them --
             if isinstance(sprite, Zombie):
                 sprite.draw_unit_health()   
@@ -282,11 +295,16 @@ class Game:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
             if self.draw_debug:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1)
+        # -- resets the chargebar if the player is out of range of any lootbox --
+        if not is_near_loot:
+            self.player.charging = 0
+        # -- day night cycle --
+        if self.night:
+            self.render_fog()
+        # -- dev mode / debug mode display --
         if self.draw_debug:
             for wall in self.walls:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(wall.rect), 1)
-        if self.night:
-            self.render_fog()
         # HUD functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
         self.draw_text('Zombies: {}'.format(len(self.zombies)), self.hud_font, 30, WHITE,
@@ -310,6 +328,8 @@ class Game:
                     self.paused = not self.paused
                 if event.key == pg.K_n:
                     self.night = not self.night
+                if event.key == pg.K_c: # 'close' an open menu
+                    self.player.charging = 0
 
     def show_start_screen(self):
         pass

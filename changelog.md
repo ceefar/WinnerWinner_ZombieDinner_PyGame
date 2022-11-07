@@ -1,4 +1,4 @@
-# v1.01 - 4/11
+# v1.00 - 4/11
 [playground-tests-tho]
 - minimap for player
     - zombies works but huge map size lags so will find an alternative to initial simple functionality
@@ -8,7 +8,7 @@
     - includes time int ui, rising and lowering sun icon and 7am daily
     - small optimisation for minimap class again, back to 60fps
 
-# v1.01 5/11
+# v1.00 5/11
 [still-playground-mvp-finalisation-tests]
 - smoothed out day night cycle
 - added functionality to manually change speed of the cycle
@@ -27,10 +27,16 @@
 - added red/green visual clarity for lootable box highlights to show if they can be opened or not based on current lockpicking level
 
 
-# v1.02 6/11
+# v1.01 6/11
 [part-playground-part-final]
 - images concept and ui formatting improved again
 - rarity system at item level overhauled
 - proper item types concept
 - stacking logic (not implemented)
 - realised that need to just start this to final so doing that now starting at lootables
+
+
+# v1.01 7/11
+[starting-final]
+- now lootables clean and working, multiple images n ting
+- finishing up opening logic, c to close, etc

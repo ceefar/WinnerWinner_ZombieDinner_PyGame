@@ -27,8 +27,9 @@ class Player(pg.sprite.Sprite):
         # -- actions x inventory --
         self.charging = 0
         # -- skills x abilities --
-        self.default_skill_points = {"lockpicking":3} # default is 3 for lockpicking as we use it comparative to seconds for opening things (i.e. 7 second lock, player has a 3 second unlock skill - note we may or may not buffer this, taking away the player unlock time from the actual time)
+        self.default_skill_points = {"lockpicking": 3} # default is 3 for lockpicking as we use it comparative to seconds for opening things, works well as is especially as a start value vs other items rarity x unlock difficulty tbf (i.e. 7 second lock, player has a 3 second unlock skill - note we may or may not buffer this, taking away the player unlock time from the actual time)
         self.lockpicking_skill_points = 3  # would convert skills and abilities to a player dictionary too, or class, as it could become sizeable but opting for simpler implementation for this first time pygame project
+    
     def get_keys(self):
         self.rot_speed = 0
         self.vel = vec(0, 0)
