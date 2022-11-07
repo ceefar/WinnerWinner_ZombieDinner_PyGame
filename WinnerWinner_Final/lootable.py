@@ -2,11 +2,6 @@
 from settings import *
 from random import randint, choice, choices
    
-# to finish up
-#   - have actually unlocking again
-#   - this means blit chargebar too
-#   - make sure u clean up and bs and delete bs too, dw have copies / make copies 
-# then 
 #   - pure bosh straight into our new menu stuff
 #   - starting out being sure we have the dict all sorted properly to work flawlessly when passing n deleting
 #   - NOT OPTIONAL!!! => with attention now to undo, delete, stacking, and consuming        
@@ -73,18 +68,15 @@ class Lootable(pg.sprite.Sprite):
             self.rect.center = (x, y)
             self.hit_rect = self.rect # used for drawing dev mode debug display so dont remove though isnt really used                       
             # -- lootable unlock stuff --
-            self.lock_diff_time = self.set_lock_difficulty_time()
-            self.lockpicking_ability = 300 # obvs want this to be part of a player abilites dictionary that is on the player object but just leaving it here for now      
-            self.chargebar_failure_text = choice(["- idk wtf to do here?","- next time check first?", "- lockpicking too low", "- requires `HAMMER`"]) # faux implementation, not intending on doing it properly though it could easily be added in a variety of ways
-     
+            self.lock_diff_time = self.set_lock_difficulty_time()  
+            self.chargebar_failure_text = choice(["- idk wtf to do here?","- next time check first?"]) # previous faux implementation with "requires HAMMER" removed, not intending on doing it properly though it could easily be added in a variety of ways
+
 
         # to finish up boshhh
         self.my_loot = self.get_a_loot()        
 
 
-        # increase our unlock speed significantly while in dev mode
         if self.game.draw_debug: 
-            self.lock_diff_time = int(self.lock_diff_time / 5) 
             print(f"Debuggy:\n{self.my_id = } {self.rarity = }\n{self.my_type = } {self.rarity_int = }\n{selected_lootbox_info = } {self.lock_diff_time = }\n{self.display_name = }")
 
     # -- basically finalised --
@@ -97,13 +89,12 @@ class Lootable(pg.sprite.Sprite):
             n += 1
         pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
 
-    def set_lock_difficulty_time(self): # simple addition of randomised element is fine for now but does need to be updated to weighting instead of current implementation
-        random_buffer = randint(100, 800 - self.rarities[self.rarity]["diff_buffer"])
-        # print(f"{random_buffer = }")
+    def set_lock_difficulty_time(self): # to want to update this to weighting instead of current implementation so it better covers the high range and actually covers the low range (which we dont right now, which is fine tbf but ideally i would like it updated)
+        random_buffer = randint(100, 800 - self.rarities[self.rarity]["diff_buffer"]) # we are having long unlock timers as we want to increase the zombie alert range when the player is unlocking lootboxes (with the potential to add a noise_level variable to these lootboxes in future)
         return random_buffer
 
     def can_player_open(self):
-        return False if self.lock_diff_time > self.lockpicking_ability else True
+        return False if self.lock_diff_time > (self.game.player.lockpicking_skill_points * 100) else True
     
     def get_display_size(self):
         sizes = {1:"tiny", 2:"small", 3:"avg", 4:"avg", 5:"large", 6:"huge"}
@@ -113,14 +104,15 @@ class Lootable(pg.sprite.Sprite):
         rng_selection = choice(potential_lootboxes)
         return rng_selection
 
-    def get_lock_difficulty_display(self): # havent done it yet but this should change dynamically once adding updatable skills via skill points without any problems 
-        # if the player can open it the display message is based on how long it will take to open, self confessed very rudimentary but it can easily be built on
-        adjusted_time_difficulty = self.lockpicking_ability - self.lock_diff_time
+    def get_lock_difficulty_display(self): # if the player can open it the display message is based on how long it will take to open, self confessed very rudimentary but it can easily be built on
+        adjusted_time_difficulty = (self.game.player.lockpicking_skill_points * 100) - self.lock_diff_time # essentially the same as can player open, if it is a negative number then the player cant open it
+        # print(f"{self.my_id}, {(self.game.player.lockpicking_skill_points * 100)}, {self.lock_diff_time} {adjusted_time_difficulty}")
         if self.can_player_open():            
-            return "Shut : Open" if adjusted_time_difficulty < 50 else "Shut : Jammed"
+            return f"Shut : Open" if adjusted_time_difficulty < 50 else f"Shut : Jammed"
         else:
-            return "Locked : Small Padlock" if adjusted_time_difficulty > -100 else "Locked : Large Padlock"
-
+            # potentially could add ability for certain items to break `flimsy` locks, but skipping that for now
+            return f"Locked Flimsy : +{(adjusted_time_difficulty // 100) * -1} exp" if adjusted_time_difficulty > -100 else f"Locked Tight : +{(adjusted_time_difficulty // 100) * -1} exp"
+        
     def get_rarity_colour(self): 
         return self.rarities[self.rarity]["colour"]                
 
@@ -129,6 +121,26 @@ class Lootable(pg.sprite.Sprite):
         start_rect = self.game.camera.apply_rect(start_rect)
         end_rect = pg.Rect(self.title_destination.x - 2, self.title_destination.y - self.info_box_info_surf.get_height(), 2, 2)         
         pg.draw.line(self.game.screen, BLUEMIDNIGHT, start_rect.center, end_rect.center, 3) # self.title_destination.topleft
+
+    def get_failure_text(self):
+        # created a function for this to expand the functionality in future
+        return self.chargebar_failure_text
+
+    def blit_chargebar(self, pct):
+        # setup the what text will be displayed based on game condtions
+        if pct >= 100: # if the bar is fully charged show either open or oof if you've just tried to open a locked lootbox (greater than your skill level)
+            pct = 100
+            chargebar_text = f"- open" if self.can_player_open() else f"- oof"
+        chargebar_text = f"- opening..." if self.can_player_open() else self.get_failure_text()    
+        # the actual charging up bar
+        chargebar_surf = pg.Surface(((self.info_box_info_surf.get_width() / 100) * pct, self.info_box_info_surf.get_height()))
+        chargebar_surf.fill(ORANGE)
+        # create the text with masking effect and blit it to the charging bar surface
+        opening_text_surf = self.game.FONT_SILK_REGULAR_12.render(chargebar_text, True, BLACK) # "text", antialias, color
+        chargebar_surf.blit(opening_text_surf, (int(self.padding_x/2), int(self.padding_y/2)))
+        # blit the charging bar with text on top
+        self.game.screen.blit(chargebar_surf, self.title_destination)
+
 
     # -- to refactor / optimise --
     def draw_lootable_info(self): 
@@ -167,26 +179,13 @@ class Lootable(pg.sprite.Sprite):
         self.info_box_info_surf.set_alpha(190)
         self.info_box_info_surf.blit(self.info_box_info_text_surf, (int(self.padding_x/2), int(self.padding_y/2)))
         self.game.screen.blit(self.info_box_info_surf, self.title_destination)
-        
-    def blit_chargebar(self, pct):
-        # setup
-        if self.can_player_open():
-            chargebar_text = f"- opening..."
-        else:
-            chargebar_text = self.chargebar_failure_text
-        if pct >= 100:
-            pct = 100
-            chargebar_text = f"- open" if self.can_player_open() else f"- oof"
-        # actual bar
-        chargebar_surf = pg.Surface(((self.info_box_info_surf.get_width() / 100) * pct, self.info_box_info_surf.get_height()))
-        chargebar_surf.fill(ORANGE)
-        # text with mask effect
-        opening_text_surf = self.game.FONT_SILK_REGULAR_12.render(chargebar_text, True, BLACK) # "text", antialias, color
-        chargebar_surf.blit(opening_text_surf, (int(self.padding_x/2), int(self.padding_y/2)))
-        # blit
-        self.game.screen.blit(chargebar_surf, self.title_destination)
+        # little line that connects the box to the menu it shows
+        self.draw_lil_line()
+
 
     # -- in progress --
+
+    # first need to have unlocking tbf then can do below
     # - loot id (unique identifier)
     # - rarity
     # - loot type

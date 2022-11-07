@@ -18,15 +18,22 @@ class Player(pg.sprite.Sprite):
         self.vel = vec(0, 0)
         self.pos = vec(x, y)
         self.rot = 0
+        # -- shooting --
         self.last_shot = 0
-        self.health = PLAYER_HEALTH
         self.weapon = 'pistol'
+        # -- health --
+        self.health = PLAYER_HEALTH
         self.damaged = False
-
+        # -- actions x inventory --
+        self.charging = 0
+        # -- skills x abilities --
+        self.default_skill_points = {"lockpicking":3} # default is 3 for lockpicking as we use it comparative to seconds for opening things (i.e. 7 second lock, player has a 3 second unlock skill - note we may or may not buffer this, taking away the player unlock time from the actual time)
+        self.lockpicking_skill_points = 3  # would convert skills and abilities to a player dictionary too, or class, as it could become sizeable but opting for simpler implementation for this first time pygame project
     def get_keys(self):
         self.rot_speed = 0
         self.vel = vec(0, 0)
         keys = pg.key.get_pressed()
+        # -- movement input --
         if keys[pg.K_LEFT] or keys[pg.K_a]:
             self.rot_speed = PLAYER_ROT_SPEED
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
@@ -35,6 +42,19 @@ class Player(pg.sprite.Sprite):
             self.vel = vec(PLAYER_SPEED, 0).rotate(-self.rot)
         if keys[pg.K_DOWN] or keys[pg.K_s]:
             self.vel = vec(-PLAYER_SPEED / 2, 0).rotate(-self.rot)
+        # -- action input --
+        if keys[pg.K_e]:
+            # -- make this a function - handle_unlock --
+            unlock_speed_bonus = self.lockpicking_skill_points % self.default_skill_points["lockpicking"] # for every point over the default you get a bonus to the unlock speed
+            unlock_speed = 1 # can use this as a toggle for god mode / dev mode
+            if unlock_speed_bonus: # is greater than or equal to 1 but not 0
+                self.charging += unlock_speed + int(unlock_speed / 10) # plus 10% extra speed for each skill point in lockpicking
+            else:
+                self.charging += unlock_speed # swerve the zero div error preemptively
+        else:
+            if self.charging:  # empty it if it isnt being charged but it hasnt filled up yet, charging here is the amount charged as int not a boolean
+                if self.charging <= self.game.current_lock_time: # this is the difficulty time of the currently selected lootbox "lock" - aka lock_diff_time
+                    self.charging -= 1
         if keys[pg.K_SPACE]:
             self.shoot()
 

@@ -115,19 +115,19 @@ class Game:
         self.lootbox_small_5_img = pg.image.load(path.join(img_folder, LOOT_BOX_5_IMG)).convert_alpha()
         self.lootbox_small_6_img = pg.image.load(path.join(img_folder, LOOT_BOX_6_IMG)).convert_alpha()
         # testing resize quickly
-        self.lootbox_small_1_img = pg.transform.scale(self.lootbox_small_1_img, (38, 38))
-        self.lootbox_small_2_img = pg.transform.scale(self.lootbox_small_2_img, (38, 38))
-        self.lootbox_small_3_img = pg.transform.scale(self.lootbox_small_3_img, (38, 38))
-        self.lootbox_small_4_img = pg.transform.scale(self.lootbox_small_4_img, (38, 38))
-        self.lootbox_small_5_img = pg.transform.scale(self.lootbox_small_5_img, (38, 38))
-        self.lootbox_small_6_img = pg.transform.scale(self.lootbox_small_6_img, (38, 38))
+        self.lootbox_small_1_img = pg.transform.scale(self.lootbox_small_1_img, (46, 46))
+        self.lootbox_small_2_img = pg.transform.scale(self.lootbox_small_2_img, (46, 46))
+        self.lootbox_small_3_img = pg.transform.scale(self.lootbox_small_3_img, (46, 46))
+        self.lootbox_small_4_img = pg.transform.scale(self.lootbox_small_4_img, (46, 46))
+        self.lootbox_small_5_img = pg.transform.scale(self.lootbox_small_5_img, (46, 46))
+        self.lootbox_small_6_img = pg.transform.scale(self.lootbox_small_6_img, (46, 46))
         # larger versions
-        self.lootbox_small_1_large_img = pg.transform.scale(self.lootbox_small_1_img, (54, 54))
-        self.lootbox_small_2_large_img = pg.transform.scale(self.lootbox_small_2_img, (54, 54))
-        self.lootbox_small_3_large_img = pg.transform.scale(self.lootbox_small_3_img, (54, 54))
-        self.lootbox_small_4_large_img = pg.transform.scale(self.lootbox_small_4_img, (54, 54))
-        self.lootbox_small_5_large_img = pg.transform.scale(self.lootbox_small_5_img, (54, 54))
-        self.lootbox_small_6_large_img = pg.transform.scale(self.lootbox_small_6_img, (54, 54))
+        self.lootbox_small_1_large_img = pg.transform.scale(self.lootbox_small_1_img, (58, 58))
+        self.lootbox_small_2_large_img = pg.transform.scale(self.lootbox_small_2_img, (58, 58))
+        self.lootbox_small_3_large_img = pg.transform.scale(self.lootbox_small_3_img, (58, 58))
+        self.lootbox_small_4_large_img = pg.transform.scale(self.lootbox_small_4_img, (58, 58))
+        self.lootbox_small_5_large_img = pg.transform.scale(self.lootbox_small_5_img, (58, 58))
+        self.lootbox_small_6_large_img = pg.transform.scale(self.lootbox_small_6_img, (58, 58))
 
     def new(self):
         # initialize all variables and do all the setup for a new game
@@ -160,6 +160,8 @@ class Game:
         self.night = False
         if self.game_volume > 0:
             self.effects_sounds['level_start'].play()
+        # -- misc --
+        self.current_lock_time = 0 # needs to be initialised before starting
         
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -236,18 +238,42 @@ class Game:
         self.screen.blit(self.map_img, self.camera.apply(self.map))
         # self.draw_grid()
         for sprite in self.all_sprites:
-            
+            # -- loop all lootboxes and draw them --
             if isinstance(sprite, Lootable):
                 player_distance = (sprite.pos - self.player.pos).length()
-                # if the player is near a lootable, highlight the lootable
+                
+                # if the player is near a lootable
                 if player_distance < 90:      
                     sprite.draw_lootable_info()
-                    sprite.draw_lil_line()
-                    if sprite.can_player_open():
-                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=GREEN)  
+                    
+                    if sprite.can_player_open(): # check if the player has a high enough lockpicking skill / meets any requirements to unlock this lootable
+                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=GREEN) # highlight it green if it can be opened by the player
                     else:
-                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=RED) 
-                    sprite.draw_lootable_info()
+                        sprite.outline_mask(sprite.image.copy(), self.camera.apply(sprite), thickness=12, colr=RED) # else highlight it red if its locked                    
+                    if self.player.charging:
+
+
+                        # TO ACTUALLY JUST FINISH ALL IT IS IS...
+                        # - FIRST GET IT WORKING INDIVIDUALLY TO THE OTHERS 
+                        #   - SO WHEN YOU WALK AWAY IT CLOSES TING
+                        # - THEN GET IT OPENING THEN MENU
+                        #   - ENSURE HAVE C TO CLOSE
+                        # - SAVE TO FORK
+                        # - QUICKLY CHECK EVERYTHING AND CLEAN UP A TAD
+                        # - SAVE TO NEW FORK   
+                        # THEN LEGIT LEGIT ITS ALL THE NEW FUN STUFF, FULL ON LOOT AND MENUS AND TING!
+
+
+                        # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")                        
+                        self.current_lock_time = sprite.lock_diff_time # make this a game variable so the player can access it outside of looping all instances 
+                        charge_percent = (self.player.charging / sprite.lock_diff_time) * 100 # watch for possible zero div error here tho is an easy fix tbf
+                        sprite.blit_chargebar(charge_percent)
+                        if self.player.charging >= sprite.lock_diff_time:
+                            if sprite.can_player_open():
+                                print(f"Open a bitch")
+
+                        
+            # -- loop all zombies and draw them --
             if isinstance(sprite, Zombie):
                 sprite.draw_unit_health()   
                 sprite.draw_unit_name()
