@@ -122,7 +122,8 @@ class Lootable(pg.sprite.Sprite):
         if pct >= 100: # if the bar is fully charged show either open or oof if you've just tried to open a locked lootbox (greater than your skill level)
             pct = 100
             chargebar_text = f"- open" if self.can_player_open() else f"- oof"
-        chargebar_text = f"- opening..." if self.can_player_open() else self.get_failure_text()    
+        else:
+            chargebar_text = f"- opening..." if self.can_player_open() else self.get_failure_text()    
         # the actual charging up bar
         chargebar_surf = pg.Surface(((self.info_box_info_surf.get_width() / 100) * pct, self.info_box_info_surf.get_height()))
         chargebar_surf.fill(ORANGE)

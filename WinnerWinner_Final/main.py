@@ -8,32 +8,7 @@ from sprites import *
 from tilemap import *
 from lootable import Lootable
 from player import Player
-
-# first
-# -
-# save to fork
-
-# -
-# then
-# -
-# new fork v1.02
-# start adding menus, loot, etc all the fun stuff
-# - rememmber c to close should still work btw
-# - get i to open independently sorted early too
-# - remember to add open text btw
-# - may be worth doing tidbits for other on screen ui now too (or maybe nah lol)
-
-# previous notes
-# - 
-#   - pure bosh straight into our new menu stuff
-#   - starting out being sure we have the dict all sorted properly to work flawlessly when passing n deleting
-#   - NOT OPTIONAL!!! => with attention now to undo, delete, stacking, and consuming        
-#   - remember loot needs shit like its id, rarity, type, etc
-#   - and note do want items like clothing so might be worth a quick inclusion
-#   - and even stuff i havent done yet that i want like rarity too
-#       - and a simple randomiser for the value based on rarity too 
-#       - do we then pass the box rarity, yes we must so there we go u gotta think first lol
-#       - pseudocode it pls
+from menus import PlayerInventoryMenu
 
 
 # HUD functions
@@ -160,14 +135,18 @@ class Game:
         # initialize all variables and do all the setup for a new game
         self.all_map_lootables = {} # includes loot details for each lootable
         self.all_sprites = pg.sprite.LayeredUpdates()
+        # -- sprite groups --
         self.walls = pg.sprite.Group()
         self.zombies = pg.sprite.Group()
         self.bullets = pg.sprite.Group()
         self.items = pg.sprite.Group()
         self.lootables = pg.sprite.Group()
+        self.menus = pg.sprite.Group()
+        # -- current level map setup -- 
         self.map = TiledMap(path.join(self.map_folder, 'level_large.tmx'))
         self.map_img = self.map.make_map()
         self.map.rect = self.map_img.get_rect()
+        # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
         for tile_object in self.map.tmxdata.objects:
             obj_center = vec(tile_object.x + tile_object.width / 2,
                              tile_object.y + tile_object.height / 2)
@@ -181,8 +160,10 @@ class Game:
             if tile_object.name in ['health', 'shotgun']:
                 Item(self, obj_center, tile_object.name)
             if tile_object.name == 'lootable_box_small': 
-                Lootable(self, obj_center.x, obj_center.y, tile_object.name)                
+                Lootable(self, obj_center.x, obj_center.y, tile_object.name)       
+        # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
+        # -- general -- 
         self.paused = False
         self.night = False
         if self.game_volume > 0.0:
@@ -266,7 +247,7 @@ class Game:
         # self.draw_grid()
         is_near_loot = False  # for resetting the charge meter when the player is out of range of any lootbox
         for sprite in self.all_sprites:
-            # -- loop all lootboxes and draw them --
+            # -- loop all lootboxes and draw to their surfaces --
             if isinstance(sprite, Lootable):
                 player_distance = (sprite.pos - self.player.pos).length()
                 if player_distance < 90: # if the player is near this lootable      
@@ -284,17 +265,19 @@ class Game:
                         # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")   
                         if self.player.charging >= sprite.lock_diff_time:
                             if sprite.can_player_open():
-                                print(f"Open a bitch")
-                
+                                self.player_inventory_menu = PlayerInventoryMenu(self, self.player.player_inventory, sprite)     
+                                self.draw_player_inventory()                           
             # -- loop all zombies and draw them --
             if isinstance(sprite, Zombie):
                 sprite.draw_unit_health()   
                 sprite.draw_unit_name()
                 sprite.draw_unit_status()
                 sprite.draw_unit_level()
+            # -- draws every sprite in the `all_sprites` group
             self.screen.blit(sprite.image, self.camera.apply(sprite))
+            # -- draw dev mode / debug mode rects, hit boxes, and info --
             if self.draw_debug:
-                pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1)
+                pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1) # draw the objects hit rect
         # -- resets the chargebar if the player is out of range of any lootbox --
         if not is_near_loot:
             self.player.charging = 0
@@ -307,12 +290,28 @@ class Game:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(wall.rect), 1)
         # HUD functions
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
-        self.draw_text('Zombies: {}'.format(len(self.zombies)), self.hud_font, 30, WHITE,
-                       WIDTH - 10, 10, align="topright")
+        self.draw_text('Zombies : {}'.format(len(self.zombies)), self.hud_font, 30, WHITE, WIDTH - 10, 10, align="topright") # temp af af af
+        self.draw_text('Gold : {}'.format(self.process_gold()), self.hud_font, 30, WHITE, WIDTH - 10, 40, align="topright") # temp af af af
         if self.paused:
             self.screen.blit(self.dim_screen, (0, 0))
             self.draw_text("Paused", self.title_font, 105, RED, WIDTH / 2, HEIGHT / 2, align="center")
         pg.display.flip()
+
+    # ---- temp af af af ---- 
+    def process_gold(self):
+        running_gold = 0
+        # print(f"{self.player.player_inventory = }")
+        for item_id_key, item_info_dict in self.player.player_inventory.items():
+            if item_info_dict["loot_type"] == "gold":
+                cash_money = item_info_dict["loot_value"]
+                running_gold += cash_money
+        return running_gold
+    # ---- end temp af af af ----         
+
+    def draw_player_inventory(self):
+        # as its in multiple locations (button press, open lootable object) we keep this in its own function incase we want to expand the functionality
+        self.player_inventory_menu.update()  
+        self.player_inventory_menu.draw_inventory_styling()
 
     def events(self):
         # catch all events here
@@ -330,6 +329,9 @@ class Game:
                     self.night = not self.night
                 if event.key == pg.K_c: # 'close' an open menu
                     self.player.charging = 0
+                if event.key == pg.K_i: # 'inventory' menu                
+                    # need to implement this
+                    ... # needs to be flags as cant use this event loop for drawing per frame remember 
 
     def show_start_screen(self):
         pass

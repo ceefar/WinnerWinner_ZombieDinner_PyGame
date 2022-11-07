@@ -39,4 +39,9 @@
 # v1.01 7/11
 [starting-final]
 - now lootables clean and working, multiple images n ting
-- finishing up opening logic, c to close, etc
+- drastically improved lootable locking, rarity, and opening time difficulty logic
+- added c to close and other minor ux improvements to final version
+- finalised lootable proximity menu with subtext etc
+- starting menus with improved ui
+- added basic player inventory styling 
+- upgrading player inventory from simple list to complex dict array structure, is large overhaul basically requires redoing this previous functionality from scratch which is fine but time consuming tbf
