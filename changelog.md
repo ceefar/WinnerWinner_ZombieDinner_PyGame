@@ -57,4 +57,8 @@
 
 # v1.03 8/11
 [final-doing-loot-x-lootables-x-inventorymenus]
+- fixed bug when clicking items in lootable menu where item rects and ids were not correct, caused by unique id duplication issue during testing
+- configured undo for lootable menu via super and parent class and works a treat, am very pleased with that
+
+
 - new version as moving into final add remove undo functionality plus stacking and consumable stuff

@@ -235,9 +235,9 @@ class Lootable(pg.sprite.Sprite):
             loot_item_details_dict["loot_name"] = loot_name
             # finally nest dem all
             loot_item_dict = {loot_item_id: loot_item_details_dict}
-            print(f"\n{loot_item_dict = }")   
+            print(f"{loot_item_dict = }")   
             final_return_dict[loot_item_id] = loot_item_details_dict
-        print(f"\n- - - - - - \n{final_return_dict = }")   
+        print(f"- - - - - - \n{final_return_dict = }\n- - - - - - \n")   
         return final_return_dict
 
         # {"loot_name":"gold", "loot_type":"gold", "loot_value":420, "loot_rarity":1, "loot_rect": False}

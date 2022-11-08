@@ -39,16 +39,15 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         header_bg_surf.fill(DARKGREY)
         header_bg_surf.set_alpha(220)
         # undo button, surf dest and temp 'u' text
-        if not isinstance(self, Lootable_Menu): # temporarily restricting the undo functionality to the player inventory only as thats the lootable menu didnt exist when i was implementing it so it hasnt been sorted out yet
-            undo_text_surf = self.game.FONT_SILK_REGULAR_12.render("U", True, BLACK)
-            undo_center_offset = (int(header_text_surf_height - undo_text_surf.get_width())/2, int(header_text_surf_height - undo_text_surf.get_height())/2)
-            undo_button_surf = pg.Surface((header_text_surf_height, header_text_surf_height)).convert_alpha()
-            undo_button_surf.fill(BLUEGREEN)
-            undo_button_surf.blit(undo_text_surf, undo_center_offset)
-            undo_button_dest = destination.copy()
-            undo_button_dest.move_ip(300 - (header_text_surf_height * 2) + 10, 5)
-            undo_button_rect = undo_button_dest
-            self.undo_button_rect = undo_button_rect
+        undo_text_surf = self.game.FONT_SILK_REGULAR_12.render("U", True, BLACK)
+        undo_center_offset = (int(header_text_surf_height - undo_text_surf.get_width())/2, int(header_text_surf_height - undo_text_surf.get_height())/2)
+        undo_button_surf = pg.Surface((header_text_surf_height, header_text_surf_height)).convert_alpha()
+        undo_button_surf.fill(BLUEGREEN)
+        undo_button_surf.blit(undo_text_surf, undo_center_offset)
+        undo_button_dest = destination.copy()
+        undo_button_dest.move_ip(300 - (header_text_surf_height * 2) + 10, 5)
+        undo_button_rect = undo_button_dest
+        self.undo_button_rect = undo_button_rect
         # centralise the text
         header_destination = destination.copy()
         header_destination.move_ip(5, 3)
@@ -56,6 +55,9 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         self.game.screen.blit(header_bg_surf, destination)
         if not isinstance(self, Lootable_Menu):
             if self.game.player_undo:
+                self.game.screen.blit(undo_button_surf, undo_button_dest)
+        else:
+            if self.game.lootable_undo:
                 self.game.screen.blit(undo_button_surf, undo_button_dest)
         self.game.screen.blit(header_text_surf, header_destination)
 
@@ -103,8 +105,8 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         self.game.screen.blit(self.image, self.game.camera.apply_rect(destination))
 
     def check_user_click_menu(self, mouse):
-        if self.undo_button_rect.collidepoint(mouse):    
-            self.game.handle_player_undo()
+        if self.undo_button_rect.collidepoint(mouse):   
+            self.game.handle_player_undo() 
         for id, info_dict in self.game.player.player_inventory.items(): # _ if not using id
             rect = self.game.camera.apply_rect(info_dict["loot_rect"])
             if rect.collidepoint(mouse): # print(f"{rect = }") # print(f"{info_dict = }") # print(f"{self.inventory_dict[id] = }")
@@ -121,7 +123,9 @@ class Lootable_Menu(Inventory_Menu):
 
     # CLEARLY WHERE THE DEBUG PRINTS SHOULD BE 
     def check_user_click_menu(self, mouse):
-        print(f"CRIT {self.item_rects = }")
+        if self.undo_button_rect.collidepoint(mouse):
+            self.game.handle_lootable_undo()
+        print(f"All item rects in this menu : {self.item_rects}")
         for loot_id, loot_item_rect in self.item_rects.items():
             rect = self.game.camera.apply_rect(loot_item_rect)
             if rect.collidepoint(mouse):

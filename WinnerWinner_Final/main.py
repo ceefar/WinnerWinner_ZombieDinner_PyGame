@@ -153,7 +153,8 @@ class Game:
             self.effects_sounds['level_start'].play()
         # -- misc --
         self.current_lock_time = 0 # needs to be initialised before starting
-        self.player_undo = {}
+        self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
+        self.lootable_undo = {} # stores the last thing you removed from the lootable inventory for undo # lootable_inventory_undo
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -271,6 +272,7 @@ class Game:
         if not is_near_loot:
             self.player.charging = 0
             self.player_undo = False
+            self.lootable_undo = False
         # -- day night cycle --
         if self.night:
             self.render_fog()
@@ -318,7 +320,10 @@ class Game:
                         selected_loot = self.player_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
                         selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
                         if selected_inventory_loot:
-                            print(f"{selected_inventory_loot = }") 
+                            print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
+                            self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
+                            self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
+                            self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
                         # self.player.player_inventory[selected_inventory_loot["loot_id"]] = selected_inventory_loot
                         # self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot["loot_id"])
                     if selected_loot:
@@ -351,12 +356,25 @@ class Game:
                 if event.key == pg.K_c: # 'close' an open menu
                     self.player.charging = 0 # should make a handler function for this now huh
                     self.player_undo = False
+                    self.lootable_undo = False
                 if event.key == pg.K_u : # 'undo' the last delete from inventory
                     if self.check_mouse_click: # only if you have an open menu (hence why we are checking for mouse clicks, as a menu is now open, else why bother)
                         self.handle_player_undo()
+                        self.handle_lootable_undo()
                 if event.key == pg.K_i: # 'inventory' menu                
                     # need to implement this
                     ... # needs to be flags as cant use this event loop for drawing per frame remember 
+
+    def handle_lootable_undo(self): 
+        undo_item_id = list(self.lootable_undo.keys())[0]
+        undo_item_dictionary = list(self.lootable_undo.values())[0]
+        print(f"{undo_item_dictionary = }, {undo_item_id = }")
+        self.lootable_inventory_menu.the_lootable.my_loot[undo_item_id] = undo_item_dictionary
+        # now we just need some kinda simple flag, maybe for both directions that will say if the last action added or removed from one of the inventories (i.e. wasnt a delete)
+        # if it was inventory to inventory, then you pop and put instead of just put
+        # omg orrrrrr
+        # just check during update and never allow duplicates ?!
+        # v nearly there tho very happy
 
     def handle_player_undo(self): # currently player inventory delete undo only 
         undo_item_id = list(self.player_undo.keys())[0]
