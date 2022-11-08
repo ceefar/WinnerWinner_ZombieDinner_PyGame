@@ -60,6 +60,8 @@
 - fixed bug when clicking items in lootable menu where item rects and ids were not correct, caused by unique id duplication issue during testing
 - configured undo for lootable menu via super and parent class and works a treat, am very pleased with that
 - loot placement and removing and NEW! undo now working all as excepted :D
+- very much means we have a dynamic lootable system with rarities and lots of diversity 
+- plus custom ui menus for them which are VERY lightweight and have barely impacted the fps at all
 
 
 - new version as moving into final add remove undo functionality plus stacking and consumable stuff

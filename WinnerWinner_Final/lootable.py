@@ -219,9 +219,6 @@ class Lootable(pg.sprite.Sprite):
             max_rarity = self.rarity_int + 1 if self.rarity_int < 7 else self.rarity_int # defining this as dont want it to go over and readability gets lost on a single line
             loot_rarity_int = randint(1, max_rarity) # ideally have this weighted to trend closer to the lootboxes actual rarity
             loot_item_details_dict["loot_rarity"] = loot_rarity_int
-
-            print(f"{loot_item_details_dict = }")
-
             # loot value - is related to this new rarity we've just set, as well as the type, for all of these make own functions anyway but this will suffice for now
             if loot_item_details_dict["loot_type"] == "gold": # ["gold", "health", "weapon", "item", "ammo"]
                 adjusted_gold_loot_range = loot_rarity_int * 100 # adjusted based on rarity

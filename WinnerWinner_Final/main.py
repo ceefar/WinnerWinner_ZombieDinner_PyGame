@@ -370,10 +370,10 @@ class Game:
                     ... # needs to be flags as cant use this event loop for drawing per frame remember 
 
     def handle_lootable_undo(self): 
-        print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
+        # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
         undo_item_id = list(self.lootable_undo.keys())[0]
         undo_item_dictionary = list(self.lootable_undo.values())[0]
-        print(f"{undo_item_dictionary = }, {undo_item_id = }")
+        # print(f"{undo_item_dictionary = }, {undo_item_id = }")
         if self.last_undo_action == "i>p": # if the last action was inventory to player
             self.lootable_inventory_menu.the_lootable.my_loot[undo_item_id] = undo_item_dictionary
             self.player.player_inventory.pop(undo_item_id) # also remove form the player since we've brought it back to the lootable with this undo
@@ -382,7 +382,7 @@ class Game:
             self.lootable_undo = False 
         
     def handle_player_undo(self): 
-        print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
+        # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
         undo_item_id = list(self.player_undo.keys())[0]
         undo_item_dictionary = list(self.player_undo.values())[0]
         # print(f"{undo_item_dictionary = }, {undo_item_id = }")
