@@ -44,4 +44,17 @@
 - finalised lootable proximity menu with subtext etc
 - starting menus with improved ui
 - added basic player inventory styling 
-- upgrading player inventory from simple list to complex dict array structure, is large overhaul basically requires redoing this previous functionality from scratch which is fine but time consuming tbf
+- upgrading player inventory from simple list to complex dict array structure, is a laaaarge overhaul 
+- delete items from player inventory properly using ids
+- undo functionality
+- undo ui button
+- parent child and super implementation for inventory menu system that is shared between the players inventory and the lootable boxes
+
+# v1.02 8/11
+[final-doing-loot-x-lootables-x-inventorymenus]
+- sorted lootable menu to base level
+- properly working tho basic af new dynamic loot creation system, with dictionary data structure pretty much all hooked up
+
+# v1.03 8/11
+[final-doing-loot-x-lootables-x-inventorymenus]
+- new version as moving into final add remove undo functionality plus stacking and consumable stuff

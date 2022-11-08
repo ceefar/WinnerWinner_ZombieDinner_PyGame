@@ -4,7 +4,7 @@ from random import randint, choice, choices
    
    
 class Lootable(pg.sprite.Sprite):
-    loot_counter = 0 # for counting every individual piece of loot created at any given lootable
+    loot_counter = 220 # for counting every individual piece of loot created at any given lootable
 
     def __init__(self, game, x, y, type):
         # -- general setup --
@@ -34,9 +34,7 @@ class Lootable(pg.sprite.Sprite):
         # -- core lootable setup -- 
         if type == "lootable_box_small":
             potential_lootboxes = [] # getting the potential lootboxes that are available for our randomly set rarity
-            # print(f"{self.my_size = }  {self.rarity_int = }")
             for lootbox_config in self.lootboxes_setup["small"]:
-                # print(f"{lootbox_config = }")
                 if self.rarity_int >= lootbox_config["rarity_range"][0] and self.rarity_int <= lootbox_config["rarity_range"][1]:
                     if self.my_size >= lootbox_config["size_range"][0] and self.my_size <= lootbox_config["size_range"][1]:
                         potential_lootboxes.append(lootbox_config)
@@ -62,7 +60,9 @@ class Lootable(pg.sprite.Sprite):
 
 
         # to finish up boshhh
-        self.my_loot = self.get_a_loot()        
+        self.my_loot = self.get_a_loot()
+        [print(f"{a_id = } : {a_loot = }") for a_id, a_loot in self.my_loot.items()]     
+        # do the unpack stuff here as own function bosh
 
 
         if self.game.draw_debug: 
@@ -95,13 +95,9 @@ class Lootable(pg.sprite.Sprite):
 
     def get_lock_difficulty_display(self): # if the player can open it the display message is based on how long it will take to open, self confessed very rudimentary but it can easily be built on
         adjusted_time_difficulty = (self.game.player.lockpicking_skill_points * 100) - self.lock_diff_time # essentially the same as can player open, if it is a negative number then the player cant open it
-        # print(f"{self.my_id}, {(self.game.player.lockpicking_skill_points * 100)}, {self.lock_diff_time} {adjusted_time_difficulty}")
         if self.can_player_open():            
             return f"Shut : {(self.lock_diff_time / 100):.1f} difficulty" if adjusted_time_difficulty < 50 else f"Jammed : {(self.lock_diff_time / 100):.1f} difficulty"
-            # return f"Shut : {adjusted_time_difficulty / 100:.1f} difficulty" if adjusted_time_difficulty < 50 else f"Jammed : {adjusted_time_difficulty / 100:.1f} difficulty"
-            # return f"Closed : Shut " if adjusted_time_difficulty < 50 else f"Closed : Jammed"
         else:
-            # potentially could add ability for certain items to break `flimsy` locks, but skipping that for now
             return f"Locked Flimsy : +{(adjusted_time_difficulty // 100) * -1} exp" if adjusted_time_difficulty > -100 else f"Locked Tight : +{(adjusted_time_difficulty // 100) * -1} exp"
         
     def get_rarity_colour(self): 
@@ -176,6 +172,7 @@ class Lootable(pg.sprite.Sprite):
 
     # -- in progress --
 
+
     # first need to have unlocking tbf then can do below
     # - loot id (unique identifier)
     # - rarity
@@ -195,42 +192,53 @@ class Lootable(pg.sprite.Sprite):
     # - loot value
     # - position / rect position / array position / which inventory ?
 
-    def create_a_new_loot(self):
-        for _ in range(self.my_size):
-            Lootable.loot_counter += 1
-            if self.my_id not in self.game.all_map_lootables:
-                self.game.all_map_lootables[self.my_id] = [{"loot_id":Lootable.loot_counter}]
-            else:
-                self.game.all_map_lootables[self.my_id].append({"loot_id":Lootable.loot_counter})
-        print(self.game.all_map_lootables)
-        # might need try except if list doesnt exist then define it initially
+    # foods = {"chocolate":20, "mouldy sandwich":15, "pasta bake":50}
+    # medkits = {"large medkit":300, "plasters":50, "bandages":100, "painkillers":250, "small medkit":200}
+    # ["Baby Gold", "Basic Gold", "Uber Gold", "Nada", "Epic Item", "HP Medkit", "HP Food", "Ammo"]   
+    
+    # doing consumable and stackable immediately after its working
+    # just leaving here as comment is it worth having them as bools here, is that more efficient or less?
+    
+    # note have removed sub type
 
     def get_a_loot(self):
-        loot_list = []
-        self.create_a_new_loot()
-        for _ in range(self.my_size):
-            loot_list.append(self.loot_maker(choice(["Baby Gold", "Basic Gold", "Uber Gold", "Nada", "Epic Item", "HP Medkit", "HP Food", "Ammo"])))       
-        # print(f"{loot_list = }")
-        return loot_list
-    
-    def loot_maker(self, loot):
-        # aite as this is a test guna now add what i want in final even tho it means there will be some duplication
-        if "gold" in loot.lower():
-            if "baby" in loot.lower():
-                return f"{loot} - ${randint(10,50)}"       
-            elif "basic" in loot.lower():
-                return f"{loot} - ${randint(50,250)}"
+        final_return_dict = {}
+        print(f"\n- - - - - - \nCreating New Loot - {self.my_id} {self.my_size} {self.rarity}")
+        for _ in range(self.my_size): 
+            # create id 
+            Lootable.loot_counter += 1
+            loot_item_id = Lootable.loot_counter
+            loot_item_details_dict = {"loot_id": loot_item_id} # fill this up as we go, its the inner nested dict which is a value to the key id
+            # create and add type
+            item_types = ["gold", "health", "weapon", "item", "ammo"] # add weightings, move this above or own function whatever
+            rng_type = choice(item_types)
+            loot_item_details_dict["loot_type"] = rng_type
+            # item rect
+            loot_item_details_dict["loot_rect"] = False
+            # loot rarity
+            max_rarity = self.rarity_int + 1 if self.rarity_int < 7 else self.rarity_int # defining this as dont want it to go over and readability gets lost on a single line
+            loot_rarity_int = randint(1, max_rarity) # ideally have this weighted to trend closer to the lootboxes actual rarity
+            loot_item_details_dict["loot_rarity"] = loot_rarity_int
+
+            print(f"{loot_item_details_dict = }")
+
+            # loot value - is related to this new rarity we've just set, as well as the type, for all of these make own functions anyway but this will suffice for now
+            if loot_item_details_dict["loot_type"] == "gold": # ["gold", "health", "weapon", "item", "ammo"]
+                adjusted_gold_loot_range = loot_rarity_int * 100 # adjusted based on rarity
+                loot_value = randint(50, adjusted_gold_loot_range)
             else:
-                return f"{loot} - ${randint(250,1000)}"
-        if "hp" in loot.lower():
-            if "medkit" in loot.lower():
-                medkits = {"large medkit":300, "plasters":50, "bandages":100, "painkillers":250, "small medkit":200} # type : max health (which we will randomise as the range)
-                selection = choice(list(medkits.keys()))
-                return f"{selection.title()} - {randint(int(medkits[selection] / 4), medkits[selection])}"
-            elif "food" in loot.lower():
-                foods = {"chocolate":20, "mouldy sandwich":15, "pasta bake":50}
-                selection = choice(list(foods.keys()))
-                return f"{selection.title()} - {randint(10, foods[selection])}"
-        else:
-            return f"{loot} - {self.rarity[0]}"
-                
+                # switch to handle current loot types seperately, again own function and will do properly just rushing this bit as is purely cosmetic
+                loot_value = "to do"
+            loot_item_details_dict["loot_value"] = loot_value
+            # loot name - do name and value together, just as seperate functions, but just doing like this for now while finalising concept
+            loot_name = f"{loot_item_details_dict['loot_type']} {loot_item_details_dict['loot_id']}" # super super temp implementation for now to get them unique
+            loot_item_details_dict["loot_name"] = loot_name
+            # finally nest dem all
+            loot_item_dict = {loot_item_id: loot_item_details_dict}
+            print(f"\n{loot_item_dict = }")   
+            final_return_dict[loot_item_id] = loot_item_details_dict
+        print(f"\n- - - - - - \n{final_return_dict = }")   
+        return final_return_dict
+
+        # {"loot_name":"gold", "loot_type":"gold", "loot_value":420, "loot_rarity":1, "loot_rect": False}
+            

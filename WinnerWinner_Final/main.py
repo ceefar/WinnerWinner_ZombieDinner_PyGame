@@ -8,26 +8,9 @@ from sprites import *
 from tilemap import *
 from lootable import Lootable
 from player import Player
-from menus import PlayerInventoryMenu
+from menus import Inventory_Menu, Lootable_Menu
 
 
-# HUD functions
-def draw_player_health(surf, x, y, pct):
-    if pct < 0:
-        pct = 0
-    BAR_LENGTH = 100
-    BAR_HEIGHT = 20
-    fill = pct * BAR_LENGTH
-    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
-    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
-    if pct > 0.6:
-        col = GREEN
-    elif pct > 0.3:
-        col = YELLOW
-    else:
-        col = RED
-    pg.draw.rect(surf, col, fill_rect)
-    pg.draw.rect(surf, WHITE, outline_rect, 2)
 
 class Game:
     def __init__(self):
@@ -170,7 +153,8 @@ class Game:
             self.effects_sounds['level_start'].play()
         # -- misc --
         self.current_lock_time = 0 # needs to be initialised before starting
-        
+        self.player_undo = {}
+
     def run(self):
         # game loop - set self.playing = False to end the game
         self.playing = True
@@ -265,8 +249,13 @@ class Game:
                         # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")   
                         if self.player.charging >= sprite.lock_diff_time:
                             if sprite.can_player_open():
-                                self.player_inventory_menu = PlayerInventoryMenu(self, self.player.player_inventory, sprite)     
-                                self.draw_player_inventory()                           
+                                self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
+                                self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)     
+                                self.draw_player_inventory()       
+                                self.draw_lootable_menu()       
+                                # if the inventory is open then also check for user mouse click inputs
+                                self.check_mouse_click = True # could rename this to menu_is_open_check_click for clarity but is a bit wordy huh    
+                                # print(f"{self.check_click = }")            
             # -- loop all zombies and draw them --
             if isinstance(sprite, Zombie):
                 sprite.draw_unit_health()   
@@ -281,6 +270,7 @@ class Game:
         # -- resets the chargebar if the player is out of range of any lootbox --
         if not is_near_loot:
             self.player.charging = 0
+            self.player_undo = False
         # -- day night cycle --
         if self.night:
             self.render_fog()
@@ -313,11 +303,42 @@ class Game:
         self.player_inventory_menu.update()  
         self.player_inventory_menu.draw_inventory_styling()
 
+    def draw_lootable_menu(self):
+        # as its in multiple locations (button press, open lootable object) we keep this in its own function incase we want to expand the functionality
+        self.lootable_inventory_menu.update()  
+        self.lootable_inventory_menu.draw_inventory_styling()
+
     def events(self):
-        # catch all events here
+        # handle events here
         for event in pg.event.get():
+            # -- mouse events --           
+            if event.type == pg.MOUSEBUTTONUP:
+                try:
+                    if self.check_mouse_click:
+                        selected_loot = self.player_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
+                        selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
+                        if selected_inventory_loot:
+                            print(f"{selected_inventory_loot = }") 
+                        # self.player.player_inventory[selected_inventory_loot["loot_id"]] = selected_inventory_loot
+                        # self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot["loot_id"])
+                    if selected_loot:
+                        print(f"Gottem {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
+                        selected_loot_id = selected_loot["loot_id"]
+                        del_index = 0
+                        for key, item in self.player.player_inventory.items():
+                            if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
+                                del_index = key
+                        self.player_undo = {del_index:self.player.player_inventory[del_index]}
+                        self.player.player_inventory.pop(del_index)
+                # incase you click when the menu isnt up, can add a bool to supercede this shortly
+                except AttributeError as atrErr:
+                    print(f"{atrErr = }")  
+                #     except TypeError as typErr:
+                #         print(f"{typErr = }")                   
+            # -- quit event --
             if event.type == pg.QUIT:
                 self.quit()
+            # -- key down events --
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
@@ -328,10 +349,20 @@ class Game:
                 if event.key == pg.K_n:
                     self.night = not self.night
                 if event.key == pg.K_c: # 'close' an open menu
-                    self.player.charging = 0
+                    self.player.charging = 0 # should make a handler function for this now huh
+                    self.player_undo = False
+                if event.key == pg.K_u : # 'undo' the last delete from inventory
+                    if self.check_mouse_click: # only if you have an open menu (hence why we are checking for mouse clicks, as a menu is now open, else why bother)
+                        self.handle_player_undo()
                 if event.key == pg.K_i: # 'inventory' menu                
                     # need to implement this
                     ... # needs to be flags as cant use this event loop for drawing per frame remember 
+
+    def handle_player_undo(self): # currently player inventory delete undo only 
+        undo_item_id = list(self.player_undo.keys())[0]
+        undo_item_dictionary = list(self.player_undo.values())[0]
+        # print(f"{undo_item_dictionary = }, {undo_item_id = }")
+        self.player.player_inventory[undo_item_id] = undo_item_dictionary
 
     def show_start_screen(self):
         pass
@@ -369,6 +400,26 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect = text_surface.get_rect(**{"topleft": (x, y)})
         self.screen.blit(text_surface, text_rect)
+
+
+# HUD functions
+def draw_player_health(surf, x, y, pct):
+    if pct < 0:
+        pct = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 20
+    fill = pct * BAR_LENGTH
+    outline_rect = pg.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)
+    fill_rect = pg.Rect(x, y, fill, BAR_HEIGHT)
+    if pct > 0.6:
+        col = GREEN
+    elif pct > 0.3:
+        col = YELLOW
+    else:
+        col = RED
+    pg.draw.rect(surf, col, fill_rect)
+    pg.draw.rect(surf, WHITE, outline_rect, 2)
+
 
 # create the game object
 g = Game()

@@ -26,7 +26,7 @@ class Player(pg.sprite.Sprite):
         self.damaged = False
         # -- actions x inventory --
         self.charging = 0
-        self.player_inventory = {0:{"loot_name":"gold", "loot_type":"gold", "loot_value":69, "loot_rarity":1}} # image, rect etc # {loot_id:{loot_info/details}, etc} ['Uber Gold - $585', 'Epic Item - legendary'] 
+        self.player_inventory = {4:{"loot_id":4, "loot_name":"gold", "loot_type":"gold", "loot_value":69, "loot_rarity":1, "loot_rect": False}, 18:{"loot_id":18, "loot_name":"ammo - rusty", "loot_type":"ammo", "loot_value":18, "loot_rarity":1, "loot_rect": False}} # image, rect etc # {loot_id:{loot_info/details}, etc} ['Uber Gold - $585', 'Epic Item - legendary'] 
         # -- skills x abilities --
         self.default_skill_points = {"lockpicking": 3} # default is 3 for lockpicking as we use it comparative to seconds for opening things, works well as is especially as a start value vs other items rarity x unlock difficulty tbf (i.e. 7 second lock, player has a 3 second unlock skill - note we may or may not buffer this, taking away the player unlock time from the actual time)
         self.lockpicking_skill_points = 4  # would convert skills and abilities to a player dictionary too, or class, as it could become sizeable but opting for simpler implementation for this first time pygame project

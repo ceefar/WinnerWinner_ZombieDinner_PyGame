@@ -1,0 +1,45 @@
+
+# so this is working even tho the naming and shit is all wild dw is purely cosmetic
+
+# - BIG NOTE TEST QUICKLY
+#   - i still think if u say just gave them the same name you've have the same issue 
+#   - test this and if you do then use the id when placing them instead or sumnt tbf i cant remember how it works or why it would happen like that
+#   - but just figure it out and sort it however you want
+#   - maybe a sly name thats like the one u have now, the name and id but its hidden, this does EXACTLY the same thing as id tho lmao 
+
+# get it removing shit and adding flawlessly (and undo)
+
+# then straight on to stacking and ting
+
+
+
+
+
+
+note through also this ensure you tackle stacking, consuming, etc (different names for gold idea, etc)
+- so first thing to do deal with is duplicated items and ids
+- from here moving by id should be effortless
+- then simply sort stacking consuming etc, considering a new dict rv pair for this like loot_category, or maybe bools tbf
+- then finalise items and everything else here to a reaasonable degree, clean up, and stylise slightly
+- then move on to finishing on screen ui
+    - see rest of notes at this point obvs as fair few things like...
+    - blokia, weapon, other on screen ui,
+    - still havent done player status and hp stuff
+    - also start menu
+    - and maybe if level menu but seems like should do that very last if at all imo
+
+
+
+
+- still need to generally sort this obvs
+- but now that is working get the click and move sorted v quickly
+    - to do the first adding stuff keep it simple, use the true ids in the dicts which are also the keys, if id not in player invenotry dict then add it ... (and have the keys start at some new higher number)
+- consider quickly the update decorator ting? (tim or corey tut?)
+- then figure out stacking
+
+- move on to items, creating them as per the hardcoded version but with a new function for it in the lootable class 
+
+also big note but ensure it works with this shit!
+{2: [{'loot_id': 1}, {'loot_id': 2}, {'loot_id': 3}, {'loot_id': 4}, {'loot_id': 5}]}
+{2: [{'loot_id': 1}, {'loot_id': 2}, {'loot_id': 3}, {'loot_id': 4}, {'loot_id': 5}], 3: [{'loot_id': 6}, {'loot_id': 7}]}
+{2: [{'loot_id': 1}, {'loot_id': 2}, {'loot_id': 3}, {'loot_id': 4}, {'loot_id': 5}], 3: [{'loot_id': 6}, {'loot_id': 7}], 4: [{'loot_id': 8}]}
