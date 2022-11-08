@@ -231,7 +231,7 @@ class Lootable(pg.sprite.Sprite):
                 loot_value = "to do"
             loot_item_details_dict["loot_value"] = loot_value
             # loot name - do name and value together, just as seperate functions, but just doing like this for now while finalising concept
-            loot_name = f"{loot_item_details_dict['loot_type']} {loot_item_details_dict['loot_id']}" # super super temp implementation for now to get them unique
+            loot_name = f"{loot_item_details_dict['loot_type']}" # {loot_item_details_dict['loot_id']}" # super super temp implementation for now to get them unique
             loot_item_details_dict["loot_name"] = loot_name
             # finally nest dem all
             loot_item_dict = {loot_item_id: loot_item_details_dict}

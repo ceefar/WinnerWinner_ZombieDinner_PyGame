@@ -77,7 +77,7 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             # these are likely for debugging so can delete when finalised
             item_id = item["loot_id"]
             item_rarity = item["loot_rarity"]
-            name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"{item_title} {item_id}", True, WHITE)
+            name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"{item_title}", True, WHITE)
             if isinstance(self, Lootable_Menu):
                 name_subtextsurface = self.game.FONT_SILK_REGULAR_12.render(f"{item_subtext}", True, self.the_lootable.rarity_colour)
             else:
