@@ -125,7 +125,7 @@ class Lootable_Menu(Inventory_Menu):
     def check_user_click_menu(self, mouse):
         if self.undo_button_rect.collidepoint(mouse):
             self.game.handle_lootable_undo()
-        print(f"All item rects in this menu : {self.item_rects}")
+        # print(f"All item rects in this menu : {self.item_rects}")
         for loot_id, loot_item_rect in self.item_rects.items():
             rect = self.game.camera.apply_rect(loot_item_rect)
             if rect.collidepoint(mouse):

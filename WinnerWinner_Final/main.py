@@ -155,6 +155,7 @@ class Game:
         self.current_lock_time = 0 # needs to be initialised before starting
         self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
         self.lootable_undo = {} # stores the last thing you removed from the lootable inventory for undo # lootable_inventory_undo
+        self.last_undo_action = False # stores the last undo action (e.g. inventory->delete, lootable->inventory, etc) the player did as a string
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -273,6 +274,7 @@ class Game:
             self.player.charging = 0
             self.player_undo = False
             self.lootable_undo = False
+            self.last_undo_action = False
         # -- day night cycle --
         if self.night:
             self.render_fog()
@@ -324,6 +326,7 @@ class Game:
                             self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                             self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
                             self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
+                            self.last_undo_action = "i>p"
                         # self.player.player_inventory[selected_inventory_loot["loot_id"]] = selected_inventory_loot
                         # self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot["loot_id"])
                     if selected_loot:
@@ -335,6 +338,7 @@ class Game:
                                 del_index = key
                         self.player_undo = {del_index:self.player.player_inventory[del_index]}
                         self.player.player_inventory.pop(del_index)
+                        self.last_undo_action = "p>d"
                 # incase you click when the menu isnt up, can add a bool to supercede this shortly
                 except AttributeError as atrErr:
                     print(f"{atrErr = }")  
@@ -366,21 +370,27 @@ class Game:
                     ... # needs to be flags as cant use this event loop for drawing per frame remember 
 
     def handle_lootable_undo(self): 
+        print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
         undo_item_id = list(self.lootable_undo.keys())[0]
         undo_item_dictionary = list(self.lootable_undo.values())[0]
         print(f"{undo_item_dictionary = }, {undo_item_id = }")
-        self.lootable_inventory_menu.the_lootable.my_loot[undo_item_id] = undo_item_dictionary
-        # now we just need some kinda simple flag, maybe for both directions that will say if the last action added or removed from one of the inventories (i.e. wasnt a delete)
-        # if it was inventory to inventory, then you pop and put instead of just put
-        # omg orrrrrr
-        # just check during update and never allow duplicates ?!
-        # v nearly there tho very happy
-
-    def handle_player_undo(self): # currently player inventory delete undo only 
+        if self.last_undo_action == "i>p": # if the last action was inventory to player
+            self.lootable_inventory_menu.the_lootable.my_loot[undo_item_id] = undo_item_dictionary
+            self.player.player_inventory.pop(undo_item_id) # also remove form the player since we've brought it back to the lootable with this undo
+            self.player_undo = False # wipe this we put loot from the lootable to the player, then we undid that so its back with the lootable not the player, if the player could undo they would take it back i think ?
+            self.last_undo_action = False # always gets reset once the undo is complete (as the last action was simply an undo)
+            self.lootable_undo = False 
+        
+    def handle_player_undo(self): 
+        print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
         undo_item_id = list(self.player_undo.keys())[0]
         undo_item_dictionary = list(self.player_undo.values())[0]
         # print(f"{undo_item_dictionary = }, {undo_item_id = }")
         self.player.player_inventory[undo_item_id] = undo_item_dictionary
+        if self.last_undo_action == "p>d": # if you've just done a player delete action you've invalidated any lootable undo *if* you had placed a loot from the lootable to your inventory
+            self.last_undo_action = False # always gets reset once the undo is complete (as the last action was simply an undo)
+            self.lootable_undo = False # basically this is no longer valid
+            self.player_undo = False
 
     def show_start_screen(self):
         pass
