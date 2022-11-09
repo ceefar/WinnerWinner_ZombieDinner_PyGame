@@ -22,7 +22,7 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         if isinstance(self, Lootable_Menu): # dont need to do this for the player menu as it fills up, not empties
             self.height = max(height, min_height)
         else:
-            self.height = max(max_height, min_height)
+            self.height = max(max_height, min_height) 
         self.length = 300
         self.image = pg.Surface((self.length, self.height))
         self.image.fill(LIGHTGREY)
