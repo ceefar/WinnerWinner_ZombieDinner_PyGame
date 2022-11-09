@@ -13,8 +13,7 @@
 - smoothed out day night cycle
 - added functionality to manually change speed of the cycle
 - added ability to set start time of the cycle
-
-# from other folder but
+[in-another-side-playground-lol]
 - overhaulted menu ui and functionality
 - menu and item optimisations and improvements
 - updated chargebar and moved it to this new action ui with randomised info text
@@ -26,7 +25,6 @@
 - added simple line between current box and menu for visual clarity
 - added red/green visual clarity for lootable box highlights to show if they can be opened or not based on current lockpicking level
 
-
 # v1.01 6/11
 [part-playground-part-final]
 - images concept and ui formatting improved again
@@ -34,7 +32,6 @@
 - proper item types concept
 - stacking logic (not implemented)
 - realised that need to just start this to final so doing that now starting at lootables
-
 
 # v1.01 7/11
 [starting-final]
@@ -65,9 +62,15 @@
 - stackable items now implemented, with proper use of sub class too as want to include other stackable types, tho only just done gold for now
 - separated logic for gold in ui to improve stacking ui + add incrementing display string for gold "size"
 - faux achievements concept, very very basic but will give it some nice polish when finalising everything at the end
-- gold now always stays at the top of the players inventory, if the player has gold anyways, very kewl functionality tho with custom key function to sort the dict that is being blit to menu, very dynamic, much wow
-
+- gold now always stays at the top of the players inventory, if the player has gold anyways
+- very kewl functionality tho with custom key function to sort the dict that is being blit to menu, very dynamic, much wow
 
 # v1.04 9/11
-[] <ADD THE TITLE!
+[absolutely-slapping-the-gui-now-lawd]
 - min and max height for menus based on dynamic sizing working nicely
+- generally fixed some things to be more dynamic (e.g. undo box size, etc)
+- first working implementation of scroll, using only buttons, works well tho <3
+- scrolling with locking in x and y based on dynamic true scroll position
+- hiding scroll buttons when not relevant (cant scroll up or down as at top or bottom)
+
+- its actually looking really good, do need to fix the potential placement issues and add the scrollbar next to be satisfied tho (icons / triangles / arrows too - literally just need one and rotate it)

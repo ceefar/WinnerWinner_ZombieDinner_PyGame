@@ -159,6 +159,7 @@ class Game:
         self.player_threw_gold = False # for faux achievement else would move to player class, not intending on expanding this passed 1 or 2 more than this
         self.cheevo_counter = 0 # wanna replace this for just a close button on the achievement, for now its just a faux timer
         self.achievement_unlocks = False
+        self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -330,9 +331,12 @@ class Game:
             if event.type == pg.MOUSEBUTTONUP:
                 # try:
                     if self.check_mouse_click:
+                        mouse_pos = pg.mouse.get_pos() # mays well define this here
                         # check click actions in either player inventory or lootable inventory menus
-                        selected_loot = self.player_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
-                        selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
+                        selected_loot = self.player_inventory_menu.check_user_click_menu(mouse_pos)
+                        selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(mouse_pos)
+                        # check if player inventory menu has a clicked scroll button
+                        self.player_inventory_menu.check_user_click_menu_scroll(mouse_pos)
                         # lootable inventory click actions
                         if selected_inventory_loot:
                             print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
@@ -391,10 +395,6 @@ class Game:
                     self.player.charging = 0 # should make a handler function for this now huh
                     self.player_undo = False
                     self.lootable_undo = False
-                if event.key == pg.K_u : # 'undo' the last delete from inventory
-                    if self.check_mouse_click: # only if you have an open menu (hence why we are checking for mouse clicks, as a menu is now open, else why bother)
-                        self.handle_player_undo()
-                        self.handle_lootable_undo()
                 if event.key == pg.K_i: # 'inventory' menu                
                     # need to implement this
                     ... # needs to be flags as cant use this event loop for drawing per frame remember 
@@ -417,6 +417,11 @@ class Game:
         
     def handle_player_undo(self): 
         # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
+
+        # f*ck me, actually not checking the rects here - no wait we are wtf 
+        # then hopefully that fixes the scrolling issue and then just finishing up the scrolling imo with the bar then wagwan big bosh
+        print(f"{self.player_undo = }")
+
         undo_item_id = list(self.player_undo.keys())[0]
         undo_item_dictionary = list(self.player_undo.values())[0]
         # print(f"{undo_item_dictionary = }, {undo_item_id = }")

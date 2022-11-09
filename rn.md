@@ -2,6 +2,21 @@
 
 [rn-rn]
 - scrolling and max height oooo, lawd i wanna do this so badly ngl 100% we are doing it lol
+    - hover colour effect and arrows or trianges or images whatever
+    - scroll bar <3
+    - legit cont
+
+[maybe-now-or-not]
+- ngl massively do need to do this and is guna be really kewl and could actually do some fun stuff and learn a lot depending on how its done but it also could be kinda long...
+- need to do if player is standing on top of the menu it positions the player inventory in the empty right hand place instead
+    - the player should then be able to "catch" it by moving back in range again - oooooo
+
+# NO CAP
+- consider a playground real quick
+- wanna test an trigger for zombie in range enters a grappling animation with the player until X button presses
+- can zoom in for this too and have a ui with screen shake omg <3
+- because that will look sick af for video preview, which is in all seriousness the only way you can truly show the functionality
+- and you can do it sickly in aftereffects 2 min vid bosh
 
 [then]
 - time implementation and fog

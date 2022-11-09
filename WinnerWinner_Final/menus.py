@@ -13,14 +13,13 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         max_menu_items = 4.5 # just incase i wanna tweak it a bit, *8 *9 or *10 seems to be a good range, well depending on loot item container height tbf
         self.item_container_height = 46 # for each individual item not the menu itself, needed for dynamic resizing and scroll, plus ease of testing ui is nice
         height = ((len(inventory_info)) + 1) * self.item_container_height # dynamically sets the height 
+        self.true_height = height # store the height here before we set it as an instance variable that is based on the max/min height calculation, as we use it for the scroll position
         min_height = self.item_container_height * 3 # the minimum height its 3x for simplicity here but 150 - 200 is a nice range to hardcode it
         max_height =  self.item_container_height * max_menu_items 
         # -- new scrollable window implementation test --
         self.needs_scroll = True if len(inventory_info) > max_menu_items else False 
-        if not isinstance(self, Lootable_Menu):
-            ... 
-        # self.height = 0
-        if isinstance(self, Lootable_Menu):
+        # set dynamic height for the lootable only as the player menu fills up and not empties like the lootable
+        if isinstance(self, Lootable_Menu): # dont need to do this for the player menu as it fills up, not empties
             self.height = max(height, min_height)
         else:
             self.height = max(max_height, min_height)
@@ -62,26 +61,40 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         self.game.screen.blit(header_bg_surf, destination) # finally blit directly to the screen, not to the menu surface, because i want the surface to have a slight alpha channel value and the text wont
         # undo button, surf dest and temp 'u' text
         undo_text_surf = self.game.FONT_SILK_REGULAR_12.render("U", True, BLACK)
-        undo_center_offset = (int(header_text_surf_height - undo_text_surf.get_width())/2, int(header_text_surf_height - undo_text_surf.get_height())/2)
-        undo_button_surf = pg.Surface((header_text_surf_height, header_text_surf_height)).convert_alpha() # shouldnt be using header text height here so much lmao
+        undo_box_size = 18
+        undo_center_offset = (int(undo_box_size - undo_text_surf.get_width())/2, int(undo_box_size - undo_text_surf.get_height())/2)
+        undo_button_surf = pg.Surface((undo_box_size, undo_box_size)).convert_alpha() # shouldnt be using header_text_surf_height here so much lmao
         undo_button_surf.fill(BLUEGREEN)
         undo_button_surf.blit(undo_text_surf, undo_center_offset)
         undo_button_dest = destination.copy()
+        undo_button_dest.width, undo_button_dest.height = undo_box_size, undo_box_size
         undo_button_dest.move_ip(300 - (header_text_surf_height * 2) + 10, 5)
         self.undo_button_rect = undo_button_dest # eh
         # centralise the text
         header_destination = destination.copy()
         header_destination.move_ip(5, 3)
-        # quick test for implementation of scrollable window
-        if not isinstance(self, Lootable_Menu): # only test this on the player inventory right now but will expand to lootable menu 100%
+        # -- initial implementation of scrollable window - using buttons, might expand to slider but is so excessively unnecessary but i will enjoy it XD --
+        if not isinstance(self, Lootable_Menu): # only test this on the player inventory right now but planning to expand to the lootable menu too
             scroll_down_btn_surf = pg.Surface((30, 30)).convert_alpha()
             scroll_down_btn_surf.fill(BLUEGREEN)
             scroll_down_btn_dest = destination.copy()
-            scroll_down_btn_dest.move_ip(300 + 10, self.height + 2) # bottom right
-            self.scroll_down_btn_rect = scroll_down_btn_dest
+            # use a copy of the down button surface and destinatino in this state (before any changes to its position / rect)
+            scroll_up_btn_surf = scroll_down_btn_surf.copy()
+            scroll_up_btn_dest = scroll_down_btn_dest.copy()
+            # move the up button to the top and the bottom button to the bottom... thank you for coming to my ted talk
+            scroll_down_btn_dest.move_ip(300 + 10, self.height + 2) # bottom right - down btn
+            scroll_up_btn_dest.move_ip(300 + 10, 0) # top right - up btn
+            # save the rects so we can check vs the mouse pos outside of this class
+            self.scroll_down_btn_rect = scroll_down_btn_dest # should just store this in a tuple
+            self.scroll_up_btn_rect = scroll_up_btn_dest 
             # dont blit if its not full up with stuff
             if self.needs_scroll:
-                self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
+                self.current_scroll_pos = (self.game.scroll_offset * -1) + self.true_height
+                print(f"{self.current_scroll_pos = }, {self.true_height} {self.current_scroll_pos > self.true_height + int(self.item_container_height * 2) = }") # set the max extra scroll passed the bottom to be the height of 2 extra items
+                if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0: # dont blit if we cant scroll up (because we're at the 0th item in the inventory)
+                    self.game.screen.blit(scroll_up_btn_surf, scroll_up_btn_dest)
+                if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
+                    self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
         # use the different game variables to trigger blitting the respective undo buttons to each menu seperately
         if not isinstance(self, Lootable_Menu):
             if self.game.player_undo:
@@ -92,29 +105,19 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         self.game.screen.blit(header_text_surf, header_destination)
 
 
-        # # SO YOU BASICALLY JUST BANG IN AN ADDITIONAL VARIABLE HERE THAT WILL GO TO EVERY MOVE IP
-        # # THEN THAT WORKS
-        # # ONCE IT DOES
-        # # YOU THEN DO IT DYNAMICALLY BY CALCULATING THE LENGTH N TING
-        # scroll_offset = 0
-        #  + scroll_offset
+    # SO YOU BASICALLY JUST BANG IN AN ADDITIONAL VARIABLE HERE THAT WILL GO TO EVERY MOVE IP
+    # THEN THAT WORKS
+    # ONCE IT DOES
+    # YOU THEN DO IT DYNAMICALLY BY CALCULATING THE LENGTH N TING
 
     def update(self):
         if isinstance(self, Lootable_Menu):
             self.item_rects = {}
-            # self.inventory_dict = self.inventory_dict[0]
+        true_scroll_offset = 0 if isinstance(self, Lootable_Menu) else self.game.scroll_offset # set the scroll offset to be 0 if its the lootable menu 
         # loop all the items in the given inventory dictionary  
         for i, (indx_id, item) in enumerate(self.inventory_dict.items()):
-            # first handle any stacking objects
-            if item["loot_type"] == "gold": # types more important now, see below
-                # actually will be stackable only for player inventory instance, for other it should just go by types, and multiple uber gold, uber gold, should be allowed tbf
-                pass # literally just guna have different text, the difficult part is the stacking on click lol so do that first duh
-            item_title, item_value = item["loot_name"], item["loot_value"]
-            # these are probably here just for testing so can delete em when finalised
-            item_id = item["loot_id"]
-            item_rarity = item["loot_rarity"]
-            # 100% needs to be a function huh
-            if "gold" in item_title.lower():
+            item_title, item_value = item["loot_name"], item["loot_value"] # item_id, item_rarity = item["loot_id"], item["loot_rarity"]            
+            if "gold" in item_title.lower(): # 100% needs to be a function huh
                 if item_value < 50:
                     name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Baby {item_title}", True, WHITE)
                 elif item_value >= 50 and item_value < 200:
@@ -139,7 +142,7 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
                 name_subtextsurface = self.game.FONT_SILK_REGULAR_12.render(f"{item_value}", True, CYAN) # self.get_rarity_colour(self.player.open_box_rarity) <<< this will now be part of the items dictionary !
             destination = (10, 5) 
             sub_destination = (10, 25) 
-            item_text_rect = pg.rect.Rect(0, i* self.item_container_height, self.length,  self.item_container_height)
+            item_text_rect = pg.rect.Rect(0, i* self.item_container_height + true_scroll_offset, self.length,  self.item_container_height)
             item_text_bg_surf = pg.Surface((self.length,  self.item_container_height))
             if i % 2 == 0:
                 item_text_bg_surf.fill(DARKGREY)
@@ -149,23 +152,32 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             item_text_bg_surf.blit(name_subtextsurface, sub_destination)                
             self.image.blit(item_text_bg_surf, item_text_rect)
             if isinstance(self, Lootable_Menu):
-                self.item_rects[indx_id] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height), self.length,  self.item_container_height)
-                # print(f"HERE > {self.item_rects = } {self.item_rects[indx_id] = }")
+                self.item_rects[indx_id] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height) + true_scroll_offset, self.length,  self.item_container_height)
             else:    
-                self.game.player.player_inventory[indx_id]["loot_rect"] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height), self.length,  self.item_container_height)
+                self.game.player.player_inventory[indx_id]["loot_rect"] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height) + true_scroll_offset, self.length,  self.item_container_height)
         # blit the whole menu
         destination = pg.rect.Rect(self.pos.x, self.pos.y, self.length, self.height)
         self.game.screen.blit(self.image, self.game.camera.apply_rect(destination))
 
+    def check_user_click_menu_scroll(self, mouse): # needs a refactor as have just twigged the best way to do the whole mouse pos check flags stuff now we have scroll, undo, and also want x/close button (plus more scalability options in future, maybe slide - mmmmm)
+        scroll_amount = 10 # in pixels
+        if self.scroll_down_btn_rect.collidepoint(mouse):    
+            if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
+                self.game.scroll_offset -= scroll_amount 
+            # print(f"SCROLL DOWN  {self.game.scroll_offset = }")
+        if self.scroll_up_btn_rect.collidepoint(mouse):    
+            if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0:
+                self.game.scroll_offset += scroll_amount
+                # print(f"SCROLL UP {self.game.scroll_offset = }")
+
     def check_user_click_menu(self, mouse):
+        # print(f"Debuggy! \n{self.undo_button_rect = } \n{self.scroll_up_btn_rect = } \n{pg.mouse.get_pos() = }")
         if self.undo_button_rect.collidepoint(mouse):   
             self.game.handle_player_undo() 
         for id, info_dict in self.game.player.player_inventory.items(): # _ if not using id
             rect = self.game.camera.apply_rect(info_dict["loot_rect"])
             if rect.collidepoint(mouse): # print(f"{rect = }") # print(f"{info_dict = }") # print(f"{self.inventory_dict[id] = }")
-                return(info_dict)      
-        if self.scroll_down_btn_rect.collidepoint(mouse):    
-            print(f"SCROLL")
+                return(info_dict)              
 
     def add_gold(self, gold_to_add):
         for id, info_dict in self.game.player.player_inventory.items():
