@@ -328,7 +328,7 @@ class Game:
         for event in pg.event.get():
             # -- mouse events --           
             if event.type == pg.MOUSEBUTTONUP:
-                try:
+                # try:
                     if self.check_mouse_click:
                         # check click actions in either player inventory or lootable inventory menus
                         selected_loot = self.player_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
@@ -370,8 +370,8 @@ class Game:
                                 if "gold" in a_item_dict["loot_type"]:
                                     self.player_threw_gold = False
                 # incase you click when the menu isnt up, can add a bool to supercede this shortly
-                except AttributeError as atrErr:
-                    print(f"{atrErr = }")  
+                # except AttributeError as atrErr:
+                #     print(f"{atrErr = }")  
                 #     except TypeError as typErr:
                 #         print(f"{typErr = }")                   
             # -- quit event --

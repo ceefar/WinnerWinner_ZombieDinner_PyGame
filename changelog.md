@@ -68,4 +68,6 @@
 - gold now always stays at the top of the players inventory, if the player has gold anyways, very kewl functionality tho with custom key function to sort the dict that is being blit to menu, very dynamic, much wow
 
 
-- new version as moving into final add remove undo functionality plus stacking and consumable stuff
+# v1.04 9/11
+[] <ADD THE TITLE!
+- min and max height for menus based on dynamic sizing working nicely

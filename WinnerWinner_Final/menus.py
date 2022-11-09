@@ -13,15 +13,13 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         max_menu_items = 4.5 # just incase i wanna tweak it a bit, *8 *9 or *10 seems to be a good range, well depending on loot item container height tbf
         self.item_container_height = 46 # for each individual item not the menu itself, needed for dynamic resizing and scroll, plus ease of testing ui is nice
         height = ((len(inventory_info)) + 1) * self.item_container_height # dynamically sets the height 
-        min_height = 3 * max_menu_items # the minimum height its 3x for simplicity here but 150 - 200 is a nice range to hardcode it
+        min_height = self.item_container_height * 3 # the minimum height its 3x for simplicity here but 150 - 200 is a nice range to hardcode it
         max_height =  self.item_container_height * max_menu_items 
-        if len(inventory_info) > max_menu_items:
-            self.needs_scroll = True
-        else:
-            self.needs_scroll = False
+        # -- new scrollable window implementation test --
+        self.needs_scroll = True if len(inventory_info) > max_menu_items else False 
         if not isinstance(self, Lootable_Menu):
-            ... # not implementing yet tho will do in future for sure, i really enjoy this kinda stuff tho it brings very little value to this actual project lol
-        self.height = 0
+            ... 
+        # self.height = 0
         if isinstance(self, Lootable_Menu):
             self.height = max(height, min_height)
         else:
@@ -43,8 +41,9 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         # -- rects/positions of ui elements that have actions, e.g. undo, close window, scroll, etc --
         self.undo_button_rect = False
 
-    def draw_inventory_styling(self):
-        """ basically just drawing the header """
+    def draw_inventory_styling(self): # whole thing needs to be chunked into functions and generally cleaned up tho
+        """ for the little gui extras like undo button, scroll buttons, header, etc...
+        all done manually as its *much* more lightweight that some of the opensource gui libraries for pygame """
         # setup title text surf and header offset position
         if isinstance(self, Lootable_Menu):
             header_text_surf = self.game.FONT_SILK_REGULAR_14.render("Lootbox Contents", True, self.the_lootable.rarity_colour)
@@ -57,24 +56,33 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         destination = self.game.camera.apply_rect(destination).copy()
         destination.move_ip(header_offsest) # move the text to the bg box position
         # bg of the header title
-        header_bg_surf = pg.Surface((300, header_text_surf_height + 10)).convert_alpha()
+        header_bg_surf = pg.Surface((300, header_text_surf_height + 10)).convert_alpha() # width is 300, need to hard code it as is used in multiple places
         header_bg_surf.fill(DARKGREY)
         header_bg_surf.set_alpha(220) 
+        self.game.screen.blit(header_bg_surf, destination) # finally blit directly to the screen, not to the menu surface, because i want the surface to have a slight alpha channel value and the text wont
         # undo button, surf dest and temp 'u' text
         undo_text_surf = self.game.FONT_SILK_REGULAR_12.render("U", True, BLACK)
         undo_center_offset = (int(header_text_surf_height - undo_text_surf.get_width())/2, int(header_text_surf_height - undo_text_surf.get_height())/2)
-        undo_button_surf = pg.Surface((header_text_surf_height, header_text_surf_height)).convert_alpha()
+        undo_button_surf = pg.Surface((header_text_surf_height, header_text_surf_height)).convert_alpha() # shouldnt be using header text height here so much lmao
         undo_button_surf.fill(BLUEGREEN)
         undo_button_surf.blit(undo_text_surf, undo_center_offset)
         undo_button_dest = destination.copy()
         undo_button_dest.move_ip(300 - (header_text_surf_height * 2) + 10, 5)
-        undo_button_rect = undo_button_dest
-        self.undo_button_rect = undo_button_rect
+        self.undo_button_rect = undo_button_dest # eh
         # centralise the text
         header_destination = destination.copy()
         header_destination.move_ip(5, 3)
-        # finally blit directly to the screen, not to the surface, because i want the surface to have a slight alpha channel value and the text wont
-        self.game.screen.blit(header_bg_surf, destination)
+        # quick test for implementation of scrollable window
+        if not isinstance(self, Lootable_Menu): # only test this on the player inventory right now but will expand to lootable menu 100%
+            scroll_down_btn_surf = pg.Surface((30, 30)).convert_alpha()
+            scroll_down_btn_surf.fill(BLUEGREEN)
+            scroll_down_btn_dest = destination.copy()
+            scroll_down_btn_dest.move_ip(300 + 10, self.height + 2) # bottom right
+            self.scroll_down_btn_rect = scroll_down_btn_dest
+            # dont blit if its not full up with stuff
+            if self.needs_scroll:
+                self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
+        # use the different game variables to trigger blitting the respective undo buttons to each menu seperately
         if not isinstance(self, Lootable_Menu):
             if self.game.player_undo:
                 self.game.screen.blit(undo_button_surf, undo_button_dest)
@@ -82,6 +90,14 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             if self.game.lootable_undo:
                 self.game.screen.blit(undo_button_surf, undo_button_dest)
         self.game.screen.blit(header_text_surf, header_destination)
+
+
+        # # SO YOU BASICALLY JUST BANG IN AN ADDITIONAL VARIABLE HERE THAT WILL GO TO EVERY MOVE IP
+        # # THEN THAT WORKS
+        # # ONCE IT DOES
+        # # YOU THEN DO IT DYNAMICALLY BY CALCULATING THE LENGTH N TING
+        # scroll_offset = 0
+        #  + scroll_offset
 
     def update(self):
         if isinstance(self, Lootable_Menu):
@@ -148,6 +164,8 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             rect = self.game.camera.apply_rect(info_dict["loot_rect"])
             if rect.collidepoint(mouse): # print(f"{rect = }") # print(f"{info_dict = }") # print(f"{self.inventory_dict[id] = }")
                 return(info_dict)      
+        if self.scroll_down_btn_rect.collidepoint(mouse):    
+            print(f"SCROLL")
 
     def add_gold(self, gold_to_add):
         for id, info_dict in self.game.player.player_inventory.items():
