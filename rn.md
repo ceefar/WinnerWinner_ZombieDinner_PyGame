@@ -1,4 +1,7 @@
 
+ok first port of call is to get the bar size changing dynamically regardless of anything then you can start doing the move
+
+
 
 [rn-rn]
 - scrolling and max height oooo, lawd i wanna do this so badly ngl 100% we are doing it lol

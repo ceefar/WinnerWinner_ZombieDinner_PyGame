@@ -1,8 +1,9 @@
+# -- imports --
 from settings import *
 
-
-
-class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class just havent got round to it yet... also should rename to just inventory menu, and also should be snake_case, oh the shame XD
+# -- classes -- 
+# ideally will be a parent menu class just havent got round to it yet
+class Inventory_Menu(pg.sprite.Sprite): 
     def __init__(self, game, inventory_info:dict): # new default param on the_lootable allows us to blit this without having to have a lootable box near by (tho need to update appropriate mouse click functions if this is opened by pressing key i for inventory)
         self._layer = MENU_LAYER # ITEMS_LAYER 
         self.groups = game.menus 
@@ -10,14 +11,14 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         self.game, self.player = game, game.player
         # -- position, dimensions, image (just a coloured surf), & rect setup --  
         nudge_x, nudge_y = 350, 100
-        max_menu_items = 4.5 # just incase i wanna tweak it a bit, *8 *9 or *10 seems to be a good range, well depending on loot item container height tbf
+        self.max_menu_items = 4.5 # just incase i wanna tweak it a bit, *8 *9 or *10 seems to be a good range, well depending on loot item container height tbf
         self.item_container_height = 46 # for each individual item not the menu itself, needed for dynamic resizing and scroll, plus ease of testing ui is nice
         height = ((len(inventory_info)) + 1) * self.item_container_height # dynamically sets the height 
         self.true_height = height # store the height here before we set it as an instance variable that is based on the max/min height calculation, as we use it for the scroll position
         min_height = self.item_container_height * 3 # the minimum height its 3x for simplicity here but 150 - 200 is a nice range to hardcode it
-        max_height =  self.item_container_height * max_menu_items 
+        max_height =  self.item_container_height * self.max_menu_items 
         # -- new scrollable window implementation test --
-        self.needs_scroll = True if len(inventory_info) > max_menu_items else False 
+        self.needs_scroll = True if len(inventory_info) > self.max_menu_items else False 
         # set dynamic height for the lootable only as the player menu fills up and not empties like the lootable
         if isinstance(self, Lootable_Menu): # dont need to do this for the player menu as it fills up, not empties
             self.height = max(height, min_height)
@@ -75,12 +76,16 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         header_destination.move_ip(5, 3)
         # -- initial implementation of scrollable window - using buttons, might expand to slider but is so excessively unnecessary but i will enjoy it XD --
         if not isinstance(self, Lootable_Menu): # only test this on the player inventory right now but planning to expand to the lootable menu too
-            scroll_down_btn_surf = pg.Surface((30, 30)).convert_alpha()
+            scroll_btn_size = 30
+            # ---- end new scrollbar super test ----
+            scroll_down_btn_surf = pg.Surface((scroll_btn_size, scroll_btn_size)).convert_alpha()
             scroll_down_btn_surf.fill(BLUEGREEN)
             scroll_down_btn_dest = destination.copy()
             # use a copy of the down button surface and destinatino in this state (before any changes to its position / rect)
             scroll_up_btn_surf = scroll_down_btn_surf.copy()
             scroll_up_btn_dest = scroll_down_btn_dest.copy()
+            if self.game.scroll_offset == 0:
+                scroll_up_btn_surf.fill(GREY)
             # move the up button to the top and the bottom button to the bottom... thank you for coming to my ted talk
             scroll_down_btn_dest.move_ip(300 + 10, self.height + 2) # bottom right - down btn
             scroll_up_btn_dest.move_ip(300 + 10, 0) # top right - up btn
@@ -90,11 +95,19 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             # dont blit if its not full up with stuff
             if self.needs_scroll:
                 self.current_scroll_pos = (self.game.scroll_offset * -1) + self.true_height
-                print(f"{self.current_scroll_pos = }, {self.true_height} {self.current_scroll_pos > self.true_height + int(self.item_container_height * 2) = }") # set the max extra scroll passed the bottom to be the height of 2 extra items
-                if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0: # dont blit if we cant scroll up (because we're at the 0th item in the inventory)
-                    self.game.screen.blit(scroll_up_btn_surf, scroll_up_btn_dest)
-                if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
-                    self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
+                # temp_height = len(self.inventory_dict) * self.item_container_height # ok go back over true height as i think its getting somewhere else
+                # if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0: # dont blit if we cant scroll up (because we're at the 0th item in the inventory)
+                self.game.screen.blit(scroll_up_btn_surf, scroll_up_btn_dest)
+                # if self.current_scroll_pos < temp_height + int(self.item_container_height * 2): # but always blit down for now as its giving me issues *angy_face*
+                self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
+            else:
+                self.current_scroll_pos = False
+            # ---- new super test implementation of scrollbar ----            
+            self.scrollbar_height = self.rect.height - (scroll_btn_size * 2) - (2 * 10) + 30 # isn't at all the best way to do this but its fine for now
+            self.scrollbar_surf = pg.Surface((scroll_btn_size, self.scrollbar_height)).convert_alpha() # 2 * 10 is buffer top bottom <= hard code this stuff
+            scrollbar_dest = scroll_up_btn_dest.copy() # mays well be lazy and just use a copy of the scroll up buttons position for the bar as its just below it
+            scrollbar_dest.move_ip(0, scroll_btn_size + 10)
+            self.game.screen.blit(self.scrollbar_surf, scrollbar_dest)
         # use the different game variables to trigger blitting the respective undo buttons to each menu seperately
         if not isinstance(self, Lootable_Menu):
             if self.game.player_undo:
@@ -103,12 +116,6 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             if self.game.lootable_undo:
                 self.game.screen.blit(undo_button_surf, undo_button_dest)
         self.game.screen.blit(header_text_surf, header_destination)
-
-
-    # SO YOU BASICALLY JUST BANG IN AN ADDITIONAL VARIABLE HERE THAT WILL GO TO EVERY MOVE IP
-    # THEN THAT WORKS
-    # ONCE IT DOES
-    # YOU THEN DO IT DYNAMICALLY BY CALCULATING THE LENGTH N TING
 
     def update(self):
         if isinstance(self, Lootable_Menu):
@@ -161,14 +168,39 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
 
     def check_user_click_menu_scroll(self, mouse): # needs a refactor as have just twigged the best way to do the whole mouse pos check flags stuff now we have scroll, undo, and also want x/close button (plus more scalability options in future, maybe slide - mmmmm)
         scroll_amount = 10 # in pixels
-        if self.scroll_down_btn_rect.collidepoint(mouse):    
-            if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
-                self.game.scroll_offset -= scroll_amount 
-            # print(f"SCROLL DOWN  {self.game.scroll_offset = }")
+        # [ HERE! ] scrollbar_surf
+        true_len = len(self.inventory_dict) * self.item_container_height
+        og_height = self.scrollbar_height
+        menu_size = self.rect.height + 50
+        overhang_length = true_len - menu_size
+        final_test = self.scrollbar_surf.get_height() - overhang_length
+        scale_percent = (og_height / final_test)
+        updated_height = (og_height / 100) * scale_percent
+        destination_rect = pg.rect.Rect(self.scrollbar_surf.get_rect().x,self.scrollbar_surf.get_rect().y,self.scrollbar_surf.get_width(), updated_height)
+        self.scrollbar_surf = pg.transform.scale(self.scrollbar_surf, (destination_rect.x, destination_rect.y))
+
+        # its the right idea but its not working as expected and imo this is guna be a time sink so reverting to 1.04
+        # checking if theres owt from here to port as there might be some tidbits for buttons, 
+        # then just doing the remaining ui, blokia, wepaon, daynight etc
+        
+        if len(self.inventory_dict) > self.max_menu_items:
+            print(f"{true_len = }, {og_height = }, {overhang_length = }\n{scale_percent = }")
+        # ITS THE CURRENT HEIGHT (THAT IS THE MAX SIZE RIGHT) 
+        # SO WHAT U DO DUH IS THE ABOVE NEW "TRUE" HEIGHT / 100 -> THEN * BY THAT PERCENT (true height / curret height) BOSHHH 
+        # -> THAT SHOULD BE THE DYNAMICALLY SIZED BAR NEARLY THERE
+        # down button
+        if self.scroll_down_btn_rect.collidepoint(mouse):               
+            self.game.scroll_offset -= scroll_amount 
+        # up button
         if self.scroll_up_btn_rect.collidepoint(mouse):    
-            if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0:
+            if not self.game.scroll_offset == 0:
                 self.game.scroll_offset += scroll_amount
-                # print(f"SCROLL UP {self.game.scroll_offset = }")
+        # if self.scroll_down_btn_rect.collidepoint(mouse):    
+        #     if self.current_scroll_pos:
+        #         if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
+        #             self.game.scroll_offset -= scroll_amount 
+        #     else:
+        #         self.game.scroll_offset -= scroll_amount 
 
     def check_user_click_menu(self, mouse):
         # print(f"Debuggy! \n{self.undo_button_rect = } \n{self.scroll_up_btn_rect = } \n{pg.mouse.get_pos() = }")
