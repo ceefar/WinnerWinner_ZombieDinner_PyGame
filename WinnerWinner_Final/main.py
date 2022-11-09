@@ -326,7 +326,7 @@ class Game:
 
     def events(self):
         # handle events here
-        for event in pg.event.get():
+        for event in pg.event.get(): 
             # -- mouse events --           
             if event.type == pg.MOUSEBUTTONUP:
                 # try:
