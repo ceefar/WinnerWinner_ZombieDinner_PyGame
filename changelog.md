@@ -1,4 +1,4 @@
-# v1.01 - 4/11
+# v1.00 - 4/11
 [playground-tests-tho]
 - minimap for player
     - zombies works but huge map size lags so will find an alternative to initial simple functionality
@@ -8,13 +8,12 @@
     - includes time int ui, rising and lowering sun icon and 7am daily
     - small optimisation for minimap class again, back to 60fps
 
-# v1.01 5/11
+# v1.00 5/11
 [still-playground-mvp-finalisation-tests]
 - smoothed out day night cycle
 - added functionality to manually change speed of the cycle
 - added ability to set start time of the cycle
-
-# from other folder but
+[in-another-side-playground-lol]
 - overhaulted menu ui and functionality
 - menu and item optimisations and improvements
 - updated chargebar and moved it to this new action ui with randomised info text
@@ -26,11 +25,52 @@
 - added simple line between current box and menu for visual clarity
 - added red/green visual clarity for lootable box highlights to show if they can be opened or not based on current lockpicking level
 
-
-# v1.02 6/11
+# v1.01 6/11
 [part-playground-part-final]
 - images concept and ui formatting improved again
 - rarity system at item level overhauled
 - proper item types concept
 - stacking logic (not implemented)
 - realised that need to just start this to final so doing that now starting at lootables
+
+# v1.01 7/11
+[starting-final]
+- now lootables clean and working, multiple images n ting
+- drastically improved lootable locking, rarity, and opening time difficulty logic
+- added c to close and other minor ux improvements to final version
+- finalised lootable proximity menu with subtext etc
+- starting menus with improved ui
+- added basic player inventory styling 
+- upgrading player inventory from simple list to complex dict array structure, is a laaaarge overhaul 
+- delete items from player inventory properly using ids
+- undo functionality
+- undo ui button
+- parent child and super implementation for inventory menu system that is shared between the players inventory and the lootable boxes
+
+# v1.02 8/11
+[final-doing-loot-x-lootables-x-inventorymenus]
+- sorted lootable menu to base level
+- properly working tho basic af new dynamic loot creation system, with dictionary data structure pretty much all hooked up
+
+# v1.03 8/11
+[final-doing-loot-x-lootables-x-inventorymenus]
+- fixed bug when clicking items in lootable menu where item rects and ids were not correct, caused by unique id duplication issue during testing
+- configured undo for lootable menu via super and parent class and works a treat, am very pleased with that
+- loot placement and removing and NEW! undo now working all as excepted :D
+- very much means we have a dynamic lootable system with rarities and lots of diversity 
+- plus custom ui menus for them which are VERY lightweight and have barely impacted the fps at all
+- stackable items now implemented, with proper use of sub class too as want to include other stackable types, tho only just done gold for now
+- separated logic for gold in ui to improve stacking ui + add incrementing display string for gold "size"
+- faux achievements concept, very very basic but will give it some nice polish when finalising everything at the end
+- gold now always stays at the top of the players inventory, if the player has gold anyways
+- very kewl functionality tho with custom key function to sort the dict that is being blit to menu, very dynamic, much wow
+
+# v1.04 9/11
+[absolutely-slapping-the-gui-now-lawd]
+- min and max height for menus based on dynamic sizing working nicely
+- generally fixed some things to be more dynamic (e.g. undo box size, etc)
+- first working implementation of scroll, using only buttons, works well tho <3
+- scrolling with locking in x and y based on dynamic true scroll position
+- hiding scroll buttons when not relevant (cant scroll up or down as at top or bottom)
+
+- its actually looking really good, do need to fix the potential placement issues and add the scrollbar next to be satisfied tho (icons / triangles / arrows too - literally just need one and rotate it)

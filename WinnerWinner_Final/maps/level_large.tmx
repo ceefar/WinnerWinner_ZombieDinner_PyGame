@@ -198,12 +198,12 @@
  </layer>
  <objectgroup id="5" name="Lootables">
   <object id="449" name="lootable_sbox" x="4496" y="912" width="32" height="32"/>
-  <object id="450" name="lootable_box_small" x="3392" y="544" width="32" height="32"/>
+  <object id="450" name="lootable_box_small" x="3424" y="576" width="32" height="32"/>
   <object id="451" name="lootable_box_small" x="3232" y="272" width="32" height="32"/>
-  <object id="456" name="lootable_box_small" x="3104" y="496" width="32" height="32"/>
+  <object id="456" name="lootable_box_small" x="2848" y="512" width="32" height="32"/>
  </objectgroup>
  <objectgroup id="4" name="Obstacles">
-  <object id="393" name="player" x="3392" y="336" width="32" height="32"/>
+  <object id="393" name="player" x="3264" y="576" width="32" height="32"/>
   <object id="394" name="wall" x="3648" y="320" width="320" height="64"/>
   <object id="395" name="wall" x="3648" y="960" width="960" height="64"/>
   <object id="396" name="wall" x="4160" y="640" width="384" height="64"/>
