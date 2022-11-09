@@ -1,5 +1,17 @@
 
 
+[rn-rn-rn]
+- so this is clean enough tbf
+- so i say...
+- make it public because why not now tbf
+- do little images / arrows on them
+- add a alpha'd bg bar for them undernearth
+- then quickly sort this dynamic positioning if ur on top of it thing!
+    - this will be awesome :D
+- then continue
+- by doing the remaining ui, blokia, wepaon, daynight etc
+
+
 [rn-rn]
 - scrolling and max height oooo, lawd i wanna do this so badly ngl 100% we are doing it lol
     - hover colour effect and arrows or trianges or images whatever

@@ -1,7 +1,6 @@
 from settings import *
 
 
-
 class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class just havent got round to it yet... also should rename to just inventory menu, and also should be snake_case, oh the shame XD
     def __init__(self, game, inventory_info:dict): # new default param on the_lootable allows us to blit this without having to have a lootable box near by (tho need to update appropriate mouse click functions if this is opened by pressing key i for inventory)
         self._layer = MENU_LAYER # ITEMS_LAYER 
@@ -90,11 +89,9 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             # dont blit if its not full up with stuff
             if self.needs_scroll:
                 self.current_scroll_pos = (self.game.scroll_offset * -1) + self.true_height
-                print(f"{self.current_scroll_pos = }, {self.true_height} {self.current_scroll_pos > self.true_height + int(self.item_container_height * 2) = }") # set the max extra scroll passed the bottom to be the height of 2 extra items
                 if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0: # dont blit if we cant scroll up (because we're at the 0th item in the inventory)
                     self.game.screen.blit(scroll_up_btn_surf, scroll_up_btn_dest)
-                if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
-                    self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
+                self.game.screen.blit(scroll_down_btn_surf, scroll_down_btn_dest)
         # use the different game variables to trigger blitting the respective undo buttons to each menu seperately
         if not isinstance(self, Lootable_Menu):
             if self.game.player_undo:
@@ -103,12 +100,6 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
             if self.game.lootable_undo:
                 self.game.screen.blit(undo_button_surf, undo_button_dest)
         self.game.screen.blit(header_text_surf, header_destination)
-
-
-    # SO YOU BASICALLY JUST BANG IN AN ADDITIONAL VARIABLE HERE THAT WILL GO TO EVERY MOVE IP
-    # THEN THAT WORKS
-    # ONCE IT DOES
-    # YOU THEN DO IT DYNAMICALLY BY CALCULATING THE LENGTH N TING
 
     def update(self):
         if isinstance(self, Lootable_Menu):
@@ -162,7 +153,7 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
     def check_user_click_menu_scroll(self, mouse): # needs a refactor as have just twigged the best way to do the whole mouse pos check flags stuff now we have scroll, undo, and also want x/close button (plus more scalability options in future, maybe slide - mmmmm)
         scroll_amount = 10 # in pixels
         if self.scroll_down_btn_rect.collidepoint(mouse):    
-            if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
+            # if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
                 self.game.scroll_offset -= scroll_amount 
             # print(f"SCROLL DOWN  {self.game.scroll_offset = }")
         if self.scroll_up_btn_rect.collidepoint(mouse):    
