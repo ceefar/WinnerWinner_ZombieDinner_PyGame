@@ -62,6 +62,10 @@
 - loot placement and removing and NEW! undo now working all as excepted :D
 - very much means we have a dynamic lootable system with rarities and lots of diversity 
 - plus custom ui menus for them which are VERY lightweight and have barely impacted the fps at all
+- stackable items now implemented, with proper use of sub class too as want to include other stackable types, tho only just done gold for now
+- separated logic for gold in ui to improve stacking ui + add incrementing display string for gold "size"
+- faux achievements concept, very very basic but will give it some nice polish when finalising everything at the end
+- gold now always stays at the top of the players inventory, if the player has gold anyways, very kewl functionality tho with custom key function to sort the dict that is being blit to menu, very dynamic, much wow
 
 
 - new version as moving into final add remove undo functionality plus stacking and consumable stuff

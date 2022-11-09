@@ -8,7 +8,7 @@ from sprites import *
 from tilemap import *
 from lootable import Lootable
 from player import Player
-from menus import Inventory_Menu, Lootable_Menu
+from menus import Inventory_Menu, Lootable_Menu, Achievement
 
 
 
@@ -156,6 +156,9 @@ class Game:
         self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
         self.lootable_undo = {} # stores the last thing you removed from the lootable inventory for undo # lootable_inventory_undo
         self.last_undo_action = False # stores the last undo action (e.g. inventory->delete, lootable->inventory, etc) the player did as a string
+        self.player_threw_gold = False # for faux achievement else would move to player class, not intending on expanding this passed 1 or 2 more than this
+        self.cheevo_counter = 0 # wanna replace this for just a close button on the achievement, for now its just a faux timer
+        self.achievement_unlocks = False
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -282,25 +285,33 @@ class Game:
         if self.draw_debug:
             for wall in self.walls:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(wall.rect), 1)
-        # HUD functions
+        # -- HUD functions --
         draw_player_health(self.screen, 10, 10, self.player.health / PLAYER_HEALTH)
         self.draw_text('Zombies : {}'.format(len(self.zombies)), self.hud_font, 30, WHITE, WIDTH - 10, 10, align="topright") # temp af af af
-        self.draw_text('Gold : {}'.format(self.process_gold()), self.hud_font, 30, WHITE, WIDTH - 10, 40, align="topright") # temp af af af
+        self.temp_player_wallet = self.process_gold() # overhaul this so we literally just have 1 player gold variable in the Player class
+        self.draw_text('Gold : {}'.format(self.temp_player_wallet), self.hud_font, 30, WHITE, WIDTH - 10, 40, align="topright") # temp af af af
+        # -- cheevo test --
+        if self.player_threw_gold:
+            if self.player_undo:
+                if list(self.player_undo.values())[0]['loot_value'] >= 200:
+                    if self.achievement_unlocks == False:
+                        self.handle_achievements()
         if self.paused:
             self.screen.blit(self.dim_screen, (0, 0))
             self.draw_text("Paused", self.title_font, 105, RED, WIDTH / 2, HEIGHT / 2, align="center")
         pg.display.flip()
 
+
     # ---- temp af af af ---- 
-    def process_gold(self):
-        running_gold = 0
-        # print(f"{self.player.player_inventory = }")
+    def process_gold(self, ): # refactored so now this can be used to calculate gold stacking via inventory additions but need to actually refactor player currency so its much more simplified
+        starting_gold = 0
         for item_id_key, item_info_dict in self.player.player_inventory.items():
             if item_info_dict["loot_type"] == "gold":
                 cash_money = item_info_dict["loot_value"]
-                running_gold += cash_money
-        return running_gold
+                starting_gold += cash_money
+        return starting_gold
     # ---- end temp af af af ----         
+
 
     def draw_player_inventory(self):
         # as its in multiple locations (button press, open lootable object) we keep this in its own function incase we want to expand the functionality
@@ -319,26 +330,45 @@ class Game:
             if event.type == pg.MOUSEBUTTONUP:
                 try:
                     if self.check_mouse_click:
+                        # check click actions in either player inventory or lootable inventory menus
                         selected_loot = self.player_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
                         selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(pg.mouse.get_pos())
+                        # lootable inventory click actions
                         if selected_inventory_loot:
                             print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
-                            self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
+                            if selected_inventory_loot['is_stackable']:
+                                if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
+                                    if self.temp_player_wallet > 0:
+                                        print(f"Stack da gold")
+                                        self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
+                                        self.last_undo_action = "g>g" # gold stacked on gold, no undo
+                                    else:
+                                        print(f"Add da gold")
+                                        self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
+                                else:
+                                    self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
+                            else:
+                                self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                             self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
                             self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
-                            self.last_undo_action = "i>p"
-                        # self.player.player_inventory[selected_inventory_loot["loot_id"]] = selected_inventory_loot
-                        # self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot["loot_id"])
-                    if selected_loot:
-                        print(f"Gottem {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
-                        selected_loot_id = selected_loot["loot_id"]
-                        del_index = 0
-                        for key, item in self.player.player_inventory.items():
-                            if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
-                                del_index = key
-                        self.player_undo = {del_index:self.player.player_inventory[del_index]}
-                        self.player.player_inventory.pop(del_index)
-                        self.last_undo_action = "p>d"
+                            if not self.last_undo_action == "g>g": # since we set this before we have to make sure it doesnt get overwritten
+                                self.last_undo_action = "i>p"
+                        # player inventory click actions
+                        if selected_loot:
+                            print(f"Ladies & Gentleman, we got a YEET!\n=> {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
+                            selected_loot_id = selected_loot["loot_id"]
+                            del_index = 0
+                            for key, item in self.player.player_inventory.items():
+                                if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
+                                    del_index = key
+                            self.player_undo = {del_index:self.player.player_inventory[del_index]}
+                            self.player.player_inventory.pop(del_index)
+                            if not self.last_undo_action == "g>g":
+                                self.last_undo_action = "p>d"
+                            self.player_threw_gold = True
+                            for a_item_dict in self.player.player_inventory.values():
+                                if "gold" in a_item_dict["loot_type"]:
+                                    self.player_threw_gold = False
                 # incase you click when the menu isnt up, can add a bool to supercede this shortly
                 except AttributeError as atrErr:
                     print(f"{atrErr = }")  
@@ -380,6 +410,10 @@ class Game:
             self.player_undo = False # wipe this we put loot from the lootable to the player, then we undid that so its back with the lootable not the player, if the player could undo they would take it back i think ?
             self.last_undo_action = False # always gets reset once the undo is complete (as the last action was simply an undo)
             self.lootable_undo = False 
+        if self.last_undo_action == "g>g":
+            self.player_undo = False
+            self.last_undo_action = False
+            self.lootable_undo = False 
         
     def handle_player_undo(self): 
         # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
@@ -391,6 +425,21 @@ class Game:
             self.last_undo_action = False # always gets reset once the undo is complete (as the last action was simply an undo)
             self.lootable_undo = False # basically this is no longer valid
             self.player_undo = False
+        if self.last_undo_action == "g>g":
+            self.player_undo
+            self.last_undo_action = False
+            self.lootable_undo = False
+
+    def handle_achievements(self): # just temp faux implementation for now, dont even have a close button yet (which imo you need over a timer to close but cba rn)
+        if self.cheevo_counter < 300:
+            self.cheevo_counter += 1
+            self.cheevo = Achievement(self)
+            self.cheevo.draw()
+        else:
+            # reset everything
+            self.cheevo_counter = 0
+            self.player_threw_gold = False
+            self.achievement_unlocks = True
 
     def show_start_screen(self):
         pass

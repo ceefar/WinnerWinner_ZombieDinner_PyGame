@@ -16,12 +16,12 @@ class Lootable(pg.sprite.Sprite):
         self.my_id = len(game.lootables) + 1
         # -- lookup dictionary --
         self.lootboxes_setup = {"small":[ # "Mini Fridge","School Backpack", "Amazon Package","Small Briefcase"...
-                                            {"visual_type":"work briefcase", "image":self.game.lootbox_small_1_img, "lrg_image":self.game.lootbox_small_1_large_img, "size_range":(1,6), "rarity_range":(3,8)},
-                                            {"visual_type":"luxury shopping bag", "image":self.game.lootbox_small_2_img, "lrg_image":self.game.lootbox_small_2_large_img, "size_range":(1,4), "rarity_range":(5,8)},
-                                            {"visual_type":"lunchbox", "image":self.game.lootbox_small_3_img, "lrg_image":self.game.lootbox_small_3_large_img, "size_range":(1,4), "rarity_range":(1,3)},
-                                            {"visual_type":"kids backpack", "image":self.game.lootbox_small_4_img, "lrg_image":self.game.lootbox_small_4_large_img, "size_range":(1,5), "rarity_range":(1,4)},
-                                            {"visual_type":"toolbox", "image":self.game.lootbox_small_5_img, "lrg_image":self.game.lootbox_small_5_large_img, "size_range":(1,5), "rarity_range":(1,5)},
-                                            {"visual_type":"picnic basket", "image":self.game.lootbox_small_6_img, "lrg_image":self.game.lootbox_small_6_large_img, "size_range":(1,6), "rarity_range":(1,3)}
+                                            {"visual_type":"work briefcase", "image":self.game.lootbox_small_1_img, "lrg_image":self.game.lootbox_small_1_large_img, "size_range":(1,8), "rarity_range":(3,8)},
+                                            {"visual_type":"luxury shopping bag", "image":self.game.lootbox_small_2_img, "lrg_image":self.game.lootbox_small_2_large_img, "size_range":(1,7), "rarity_range":(5,8)},
+                                            {"visual_type":"lunchbox", "image":self.game.lootbox_small_3_img, "lrg_image":self.game.lootbox_small_3_large_img, "size_range":(1,8), "rarity_range":(1,3)},
+                                            {"visual_type":"kids backpack", "image":self.game.lootbox_small_4_img, "lrg_image":self.game.lootbox_small_4_large_img, "size_range":(1,7), "rarity_range":(1,4)},
+                                            {"visual_type":"toolbox", "image":self.game.lootbox_small_5_img, "lrg_image":self.game.lootbox_small_5_large_img, "size_range":(1,6), "rarity_range":(1,5)},
+                                            {"visual_type":"picnic basket", "image":self.game.lootbox_small_6_img, "lrg_image":self.game.lootbox_small_6_large_img, "size_range":(1,8), "rarity_range":(1,3)}
                                         ]}                 
         # -- rarity --
         # needed before everything else         
@@ -30,7 +30,7 @@ class Lootable(pg.sprite.Sprite):
         self.rarity_int = list(self.rarities.keys()).index(self.rarity) + 1 # of 8, zero indexed (so 7), so + 1
         self.rarity_colour = self.get_rarity_colour()
         # we also use the size to confirm which type of loot to get so we need to do this first too
-        self.my_size = randint(1,6) # actually decided to keep size completely random and not reliant on other variables (as was considering direct rarity relationship)
+        self.my_size = randint(3,8) # actually decided to keep size completely random and not reliant on other variables (as was considering direct rarity relationship)
         # -- core lootable setup -- 
         if type == "lootable_box_small":
             potential_lootboxes = [] # getting the potential lootboxes that are available for our randomly set rarity
@@ -86,7 +86,7 @@ class Lootable(pg.sprite.Sprite):
         return False if self.lock_diff_time > (self.game.player.lockpicking_skill_points * 100) else True
     
     def get_display_size(self):
-        sizes = {1:"tiny", 2:"small", 3:"avg", 4:"avg", 5:"large", 6:"huge"}
+        sizes = {1:"tiny", 2:"small", 3:"avg", 4:"avg", 5:"large", 6:"chonky", 7:"huge", 8:"massive", 9:"yo momma"}
         return f"{sizes[self.my_size]}"
 
     def get_lootbox_image_and_type(self, potential_lootboxes):    
@@ -210,10 +210,10 @@ class Lootable(pg.sprite.Sprite):
             loot_item_id = Lootable.loot_counter
             loot_item_details_dict = {"loot_id": loot_item_id} # fill this up as we go, its the inner nested dict which is a value to the key id
             # create and add type
-            item_types = ["gold", "health", "weapon", "item", "ammo"] # add weightings, move this above or own function whatever
+            item_types = ["gold", "health"] # , "weapon", "item", "ammo"] # add weightings, move this above or own function whatever
             rng_type = choice(item_types)
             loot_item_details_dict["loot_type"] = rng_type
-            # item rect
+            # loot rect
             loot_item_details_dict["loot_rect"] = False
             # loot rarity
             max_rarity = self.rarity_int + 1 if self.rarity_int < 7 else self.rarity_int # defining this as dont want it to go over and readability gets lost on a single line
@@ -230,6 +230,11 @@ class Lootable(pg.sprite.Sprite):
             # loot name - do name and value together, just as seperate functions, but just doing like this for now while finalising concept
             loot_name = f"{loot_item_details_dict['loot_type']}" # {loot_item_details_dict['loot_id']}" # super super temp implementation for now to get them unique
             loot_item_details_dict["loot_name"] = loot_name
+            # loot inventory type - e.g. stackable, consumable, etc
+            if loot_item_details_dict["loot_type"] == "gold":
+                loot_item_details_dict["is_stackable"] = True
+            else:
+                loot_item_details_dict["is_stackable"] = False
             # finally nest dem all
             loot_item_dict = {loot_item_id: loot_item_details_dict}
             print(f"{loot_item_dict = }")   

@@ -26,10 +26,10 @@ class Player(pg.sprite.Sprite):
         self.damaged = False
         # -- actions x inventory --
         self.charging = 0
-        self.player_inventory = {4:{"loot_id":4, "loot_name":"gold", "loot_type":"gold", "loot_value":69, "loot_rarity":1, "loot_rect": False}, 18:{"loot_id":18, "loot_name":"ammo - rusty", "loot_type":"ammo", "loot_value":18, "loot_rarity":1, "loot_rect": False}} # image, rect etc # {loot_id:{loot_info/details}, etc} ['Uber Gold - $585', 'Epic Item - legendary'] 
+        self.player_inventory = {} # {4:{"loot_id":4, "loot_name":"gold", "loot_type":"gold", "loot_value":69, "loot_rarity":1, "loot_rect": False}, 18:{"loot_id":18, "loot_name":"ammo - rusty", "loot_type":"ammo", "loot_value":18, "loot_rarity":1, "loot_rect": False}} # image, rect etc # {loot_id:{loot_info/details}, etc} ['Uber Gold - $585', 'Epic Item - legendary'] 
         # -- skills x abilities --
         self.default_skill_points = {"lockpicking": 3} # default is 3 for lockpicking as we use it comparative to seconds for opening things, works well as is especially as a start value vs other items rarity x unlock difficulty tbf (i.e. 7 second lock, player has a 3 second unlock skill - note we may or may not buffer this, taking away the player unlock time from the actual time)
-        self.lockpicking_skill_points = 4  # would convert skills and abilities to a player dictionary too, or class, as it could become sizeable but opting for simpler implementation for this first time pygame project
+        self.lockpicking_skill_points = 6 # default was 3 btw... also, would convert skills and abilities to a player dictionary too, or class, as it could become sizeable but opting for simpler implementation for this first time pygame project
     
     def get_keys(self):
         self.rot_speed = 0
@@ -48,7 +48,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_e]:
             # -- make this a function - handle_unlock --
             unlock_speed_bonus = self.lockpicking_skill_points % self.default_skill_points["lockpicking"] # for every point over the default you get a bonus to the unlock speed
-            unlock_speed = 2 # can use this as a toggle for god mode / dev mode - default is 1
+            unlock_speed = 10 # can use this as a toggle for god mode / dev mode - default is 1
             if unlock_speed_bonus: # is greater than or equal to 1 but not 0
                 self.charging += unlock_speed + int(unlock_speed / 10) # plus 10% extra speed for each skill point in lockpicking
             else:
