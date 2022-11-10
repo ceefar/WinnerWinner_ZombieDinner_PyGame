@@ -1,18 +1,22 @@
 
 [rn-rn]
-- skipping advanced minimap concept as realised how much work it is
-- just guna finish minimap by doing
-- zombies 
-- top icons
+just guna finish minimap by...
 - booting sumnt cute 
-    - battery idea?
-- maybe basic ios menu concept with buttons only that click and show green or red screen (as could have stats n stuff here thats quite kewl)
+    - amazon
+- zombies to minimap 
+    - the lightweight way
 - then dynamic time
+    - then make battery empty slowly and add it to the time functionality
 - then add day night
+- add remaining top icons & else light polish
 - then remaining ui then imo its just the polish
 - maybe companion too
-- gives a nice added polish with the conversations ngl
-    - and could randomise these at the start bosh
+    - gives a nice added polish with the conversations ngl
+        - and could randomise these at the start bosh
+[part-done]
+- toggle between map and home 
+    - maps transition [skipped]
+[done]
 
 
 

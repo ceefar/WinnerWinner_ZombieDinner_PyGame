@@ -141,6 +141,9 @@ LOOT_BOX_6_IMG = 'lootable_box_6.png'
 
 # UI - Mobile Minimap
 MOBILE_IMG = "mobile_1.png" # nokia_1
+BATTERY_FULL_IMG = "battery_full_1.png"
+BATTERY_EMPTY_IMG = "battery_empty_1.png"
+BATTERY_BLANK_IMG = "battery_blank_1.png"
 
 # General Handy Stuff
 def round_to_base(x, base=5): 

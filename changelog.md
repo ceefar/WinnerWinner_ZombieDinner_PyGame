@@ -76,21 +76,10 @@
 - tested out a `grappling` concept that i will now be adding later on as it can be implemented quite easily
 
 # v1.05 10/11
-[]
+[half-day-as-had-drs-apt-n-ting]
 - absolutely just had a load of things about classes and oop class structure twig in my head
 - started on a concept gui but only partly doing it as is diminising returns
-
-[rn-rn]
-- skipping advanced minimap concept as realised how much work it is
-- just guna finish minimap by doing
-- zombies 
-- top icons
-- booting sumnt cute 
-    - battery idea?
-- maybe basic ios menu concept with buttons only that click and show green or red screen (as could have stats n stuff here thats quite kewl)
-- then dynamic time
-- then add day night
-- then remaining ui then imo its just the polish
-- maybe companion too
-- gives a nice added polish with the conversations ngl
-    - and could randomise these at the start bosh
+- new mobile gui minimap
+- added player
+- added loot using the setup/init loop to avoid excess reptition 
+- home page toggle initial setup

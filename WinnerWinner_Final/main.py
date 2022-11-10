@@ -117,7 +117,13 @@ class Game:
         # -- mobile minimap x hud --
         self.mobile_img = pg.image.load(path.join(img_folder, MOBILE_IMG)).convert_alpha()
         self.mobile_img = pg.transform.scale(self.mobile_img, (320, 660))
-
+        self.battery_full_img = pg.image.load(path.join(img_folder, BATTERY_FULL_IMG)).convert_alpha()
+        self.battery_full_img = pg.transform.scale(self.battery_full_img, (34, 18))
+        self.battery_empty_img = pg.image.load(path.join(img_folder, BATTERY_EMPTY_IMG)).convert_alpha()
+        self.battery_empty_img = pg.transform.scale(self.battery_empty_img, (34, 18))
+        self.battery_blank_img = pg.image.load(path.join(img_folder, BATTERY_BLANK_IMG)).convert_alpha()
+        self.battery_blank_img = pg.transform.scale(self.battery_blank_img, (34, 18))
+        
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_map_lootables = {} # includes loot details for each lootable
@@ -135,7 +141,7 @@ class Game:
         self.map_img = self.map.make_map()
         self.map.rect = self.map_img.get_rect()
         # -- for minimap --
-        self.all_wall_positions = []
+        self.all_lootable_positions = [] # grab these now for the minimap so we do it once using this setup loop otherwise we would have to do it per frame
         # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
         for tile_object in self.map.tmxdata.objects:
             obj_center = vec(tile_object.x + tile_object.width / 2,
@@ -147,13 +153,11 @@ class Game:
             if tile_object.name == 'wall':
                 Obstacle(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
-            if tile_object.name == 'truewall':
-                self.all_wall_positions.append((obj_center.x, obj_center.y))
             if tile_object.name in ['health', 'shotgun']:
                 Item(self, obj_center, tile_object.name)
             if tile_object.name == 'lootable_box_small': 
                 Lootable(self, obj_center.x, obj_center.y, tile_object.name)
-     
+                self.all_lootable_positions.append((obj_center.x, obj_center.y))
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 
@@ -163,6 +167,8 @@ class Game:
             self.effects_sounds['level_start'].play()
         # -- minimap x gui setup --
         self.mobile_minimap = Mobile_Minimap(self)    
+        # -- for potential addition --
+        self.player_battery_level = 100 # would go for percent ig
         # -- misc --
         self.current_lock_time = 0 # needs to be initialised before starting
         self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
@@ -246,6 +252,7 @@ class Game:
     def draw(self):
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps())) # self.screen.fill(BGCOLOR)
         self.screen.blit(self.map_img, self.camera.apply(self.map))
+        # self.check_mouse_click = False
         # self.draw_grid()
         is_near_loot = False  # for resetting the charge meter when the player is out of range of any lootbox
         for sprite in self.all_sprites:
@@ -280,12 +287,13 @@ class Game:
                 sprite.draw_unit_name()
                 sprite.draw_unit_status()
                 sprite.draw_unit_level()
-            # test                
+            # -- minimap initial test implementation --                 
             if isinstance(sprite, Mobile_Minimap):
-                sprite.draw_player()
-                sprite.draw_walls()
+                sprite.draw_current_page()
                 self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
                 sprite.draw_time()
+                sprite.draw_icons()
+                # self.check_mouse_click = True
             else:
                 # -- draws every sprite in the `all_sprites` group
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
@@ -321,7 +329,6 @@ class Game:
             self.draw_text("Paused", self.title_font, 105, RED, WIDTH / 2, HEIGHT / 2, align="center")
         pg.display.flip()
 
-
     # ---- temp af af af ---- 
     def process_gold(self, ): # refactored so now this can be used to calculate gold stacking via inventory additions but need to actually refactor player currency so its much more simplified
         starting_gold = 0
@@ -331,7 +338,6 @@ class Game:
                 starting_gold += cash_money
         return starting_gold
     # ---- end temp af af af ----         
-
 
     def draw_player_inventory(self):
         # as its in multiple locations (button press, open lootable object) we keep this in its own function incase we want to expand the functionality
@@ -348,7 +354,9 @@ class Game:
         for event in pg.event.get():
             # -- mouse events --           
             if event.type == pg.MOUSEBUTTONUP: # <- own function duh
-                # try:
+                
+                self.mobile_minimap.check_click_home_icon()
+                try:
                     if self.check_mouse_click:
                         mouse_pos = pg.mouse.get_pos() # mays well define this here
                         # check click actions in either player inventory or lootable inventory menus
@@ -393,8 +401,8 @@ class Game:
                                 if "gold" in a_item_dict["loot_type"]:
                                     self.player_threw_gold = False
                 # incase you click when the menu isnt up, can add a bool to supercede this shortly
-                # except AttributeError as atrErr:
-                #     print(f"{atrErr = }")  
+                except AttributeError as atrErr:
+                    print(f"{atrErr = }")  
                 #     except TypeError as typErr:
                 #         print(f"{typErr = }")                   
             # -- quit event --
@@ -416,14 +424,16 @@ class Game:
                     self.lootable_undo = False
                 if event.key == pg.K_i: # 'inventory' menu   
                     self.mobile_minimap.update_mobile_position(400)
+                if event.key == pg.K_o: # temp for changing mobile menus
+                    mobile_page = self.mobile_minimap.current_state
+                    self.mobile_minimap.current_state = "home" if mobile_page == "minimap" else "minimap"
+                    
                     # need to implement this
                     # ... # needs to be flags as cant use this event loop for drawing per frame remember 
 
     def handle_lootable_undo(self): 
-        # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
         undo_item_id = list(self.lootable_undo.keys())[0]
         undo_item_dictionary = list(self.lootable_undo.values())[0]
-        # print(f"{undo_item_dictionary = }, {undo_item_id = }")
         if self.last_undo_action == "i>p": # if the last action was inventory to player
             self.lootable_inventory_menu.the_lootable.my_loot[undo_item_id] = undo_item_dictionary
             self.player.player_inventory.pop(undo_item_id) # also remove form the player since we've brought it back to the lootable with this undo
@@ -436,15 +446,8 @@ class Game:
             self.lootable_undo = False 
         
     def handle_player_undo(self): 
-        # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
-
-        # f*ck me, actually not checking the rects here - no wait we are wtf 
-        # then hopefully that fixes the scrolling issue and then just finishing up the scrolling imo with the bar then wagwan big bosh
-        print(f"{self.player_undo = }")
-
         undo_item_id = list(self.player_undo.keys())[0]
         undo_item_dictionary = list(self.player_undo.values())[0]
-        # print(f"{undo_item_dictionary = }, {undo_item_id = }")
         self.player.player_inventory[undo_item_id] = undo_item_dictionary
         if self.last_undo_action == "p>d": # if you've just done a player delete action you've invalidated any lootable undo *if* you had placed a loot from the lootable to your inventory
             self.last_undo_action = False # always gets reset once the undo is complete (as the last action was simply an undo)
@@ -502,6 +505,7 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect = text_surface.get_rect(**{"topleft": (x, y)})
         self.screen.blit(text_surface, text_rect)
+
 
 
 # HUD functions
