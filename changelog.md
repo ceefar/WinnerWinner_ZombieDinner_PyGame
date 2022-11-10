@@ -83,3 +83,4 @@
 - added player
 - added loot using the setup/init loop to avoid excess reptition 
 - home page toggle initial setup
+- home page clickable setup working
