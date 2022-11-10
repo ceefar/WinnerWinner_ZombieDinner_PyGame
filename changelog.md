@@ -72,5 +72,8 @@
 - first working implementation of scroll, using only buttons, works well tho <3
 - scrolling with locking in x and y based on dynamic true scroll position
 - hiding scroll buttons when not relevant (cant scroll up or down as at top or bottom)
+- reverted slightly due to scrollbar issues
+- tested out a `grappling` concept that i will now be adding later on as it can be implemented quite easily
+
 
 - its actually looking really good, do need to fix the potential placement issues and add the scrollbar next to be satisfied tho (icons / triangles / arrows too - literally just need one and rotate it)

@@ -1,34 +1,45 @@
 
-
-[rn-rn-rn]
-- so this is clean enough tbf
-- so i say...
-- make it public because why not now tbf
-- do little images / arrows on them
-- add a alpha'd bg bar for them undernearth
-- then quickly sort this dynamic positioning if ur on top of it thing!
-    - this will be awesome :D
-- then continue
-- by doing the remaining ui, blokia, wepaon, daynight etc
-
-
 [rn-rn]
-- scrolling and max height oooo, lawd i wanna do this so badly ngl 100% we are doing it lol
-    - hover colour effect and arrows or trianges or images whatever
-    - scroll bar <3
-    - legit cont
+- yes i wanna do this phone thing but unsure how much tbf
+- start by actually just doing it here just be smart with it
+- start with just the phone
+- then blit the time static
+- then change the hour on button press
+- then hide the phone on button press
+- then the minimap basic og concept
+- then a potential improved concept
+    - oooooo
+- then dynamic time
+- then add day night
 
-[maybe-now-or-not]
+
+
+[to-finish-scroll-arrows-for-now]
+- do little images / arrows on them
+- increase to 15 or more?
+- hover colour effect?
+    - also the old grey when at zero ting?
+- add a alpha'd bg bar for them undernearth
+- then continue
+
+[for-blokia]
+- you know im considering saying do a dynamic super basic google coloured map generator for the phone and just blit it to the shape of the screen area (image mask)
+- for an insanely kewl effect
+- imo this adds a massive amount of polish
+- is super dynamic so kewl to showcase
+- and could even be made full screen on button press too
+- yeah aite lets just try this
+- implement phone first
+- then do this in a new playground
+- legit even if just day night, boxes, etc (i.e. remaining ui stuff only) + this blokia stuff i would be happy to leave it, do another project, and then come back 
+
+[then]
+- the remaining ui, blokia, wepaon, daynight etc
+
+[also-maybe-now-or-not]
 - ngl massively do need to do this and is guna be really kewl and could actually do some fun stuff and learn a lot depending on how its done but it also could be kinda long...
 - need to do if player is standing on top of the menu it positions the player inventory in the empty right hand place instead
     - the player should then be able to "catch" it by moving back in range again - oooooo
-
-# NO CAP
-- consider a playground real quick
-- wanna test an trigger for zombie in range enters a grappling animation with the player until X button presses
-- can zoom in for this too and have a ui with screen shake omg <3
-- because that will look sick af for video preview, which is in all seriousness the only way you can truly show the functionality
-- and you can do it sickly in aftereffects 2 min vid bosh
 
 [then]
 - time implementation and fog
@@ -47,6 +58,12 @@
     - use this as the perf time to really get into super class and advanced methods and concepts here
     - plus also for the decorator idea too
     - use this as a page and code to highlight in a seperate explainer ting! <3 luv it
+
+[do-reeeeally-wanna-add-this]
+- wanna test an trigger for zombie in range enters a grappling animation with the player until X button presses
+- can zoom in for this too and have a ui with screen shake omg <3
+- because that will look sick af for video preview, which is in all seriousness the only way you can truly show the functionality
+- and you can do it sickly in aftereffects 2 min vid bosh
 
 [consider]
 - on get hit screen shake
