@@ -38,6 +38,7 @@ BROWNTONE3 = (101, 66, 22)      # FOR BUILDING BARRACADES
 BROWNTONE4 = (66, 40, 2)        # HOVERING FULLY BUILT BARRACADE, SHOWS SLIGHTLY DARKER TO INDICATE NULL INTERACTION BETTER THAN NOTHING 
 BROWNPALE =  (215, 195, 163)
 BLUEMIDNIGHT = (0, 51, 102)
+GOOGLEMAPSBLUE = (187,197,233)
 
 # -- General Settings --
 WIDTH = 1024   # 16 * 64 or 32 * 32 or 64 * 16
@@ -137,6 +138,9 @@ LOOT_BOX_3_IMG = 'lootable_box_3.png'
 LOOT_BOX_4_IMG = 'lootable_box_4.png'
 LOOT_BOX_5_IMG = 'lootable_box_5.png'
 LOOT_BOX_6_IMG = 'lootable_box_6.png'
+
+# UI - Mobile Minimap
+MOBILE_IMG = "mobile_1.png" # nokia_1
 
 # General Handy Stuff
 def round_to_base(x, base=5): 

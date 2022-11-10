@@ -176,6 +176,10 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
                 final_gold = info_dict["loot_value"] + gold_to_add
                 info_dict["loot_value"] = final_gold
 
+
+# remember types, stacking, consuming, undo, delete, etc, see todo notes and lootable.py notes
+# - especially cause why stylise especially as colours n shit until items done especially as i said for rarity
+
     
 # quick child implementation, do ideally need to refactor above to be a true Menu parent class and have two children one Lootable_Menu and one Player_Menu
 class Lootable_Menu(Inventory_Menu):
@@ -194,10 +198,6 @@ class Lootable_Menu(Inventory_Menu):
             if rect.collidepoint(mouse):
                 return self.inventory_dict[loot_id]   
     
-
-# remember types, stacking, consuming, undo, delete, etc, see todo notes and lootable.py notes
-# - especially cause why stylise especially as colours n shit until items done especially as i said for rarity
-
     
 class Achievement(pg.sprite.Sprite): # atleast so this semi properly so you can pass it either a string, or some kinda dict that will have id keys for these kinda events (string is fine lmao)
     def __init__(self, game):

@@ -8,6 +8,7 @@ from sprites import *
 from tilemap import *
 from lootable import Lootable
 from player import Player
+from gui import Mobile_Minimap
 from menus import Inventory_Menu, Lootable_Menu, Achievement
 
 
@@ -113,6 +114,9 @@ class Game:
         self.lootbox_small_4_large_img = pg.transform.scale(self.lootbox_small_4_img, (58, 58))
         self.lootbox_small_5_large_img = pg.transform.scale(self.lootbox_small_5_img, (58, 58))
         self.lootbox_small_6_large_img = pg.transform.scale(self.lootbox_small_6_img, (58, 58))
+        # -- mobile minimap x hud --
+        self.mobile_img = pg.image.load(path.join(img_folder, MOBILE_IMG)).convert_alpha()
+        self.mobile_img = pg.transform.scale(self.mobile_img, (320, 660))
 
     def new(self):
         # initialize all variables and do all the setup for a new game
@@ -125,10 +129,13 @@ class Game:
         self.items = pg.sprite.Group()
         self.lootables = pg.sprite.Group()
         self.menus = pg.sprite.Group()
+        self.minimaps = pg.sprite.Group()
         # -- current level map setup -- 
         self.map = TiledMap(path.join(self.map_folder, 'level_large.tmx'))
         self.map_img = self.map.make_map()
         self.map.rect = self.map_img.get_rect()
+        # -- for minimap --
+        self.all_wall_positions = []
         # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
         for tile_object in self.map.tmxdata.objects:
             obj_center = vec(tile_object.x + tile_object.width / 2,
@@ -140,10 +147,13 @@ class Game:
             if tile_object.name == 'wall':
                 Obstacle(self, tile_object.x, tile_object.y,
                          tile_object.width, tile_object.height)
+            if tile_object.name == 'truewall':
+                self.all_wall_positions.append((obj_center.x, obj_center.y))
             if tile_object.name in ['health', 'shotgun']:
                 Item(self, obj_center, tile_object.name)
             if tile_object.name == 'lootable_box_small': 
-                Lootable(self, obj_center.x, obj_center.y, tile_object.name)       
+                Lootable(self, obj_center.x, obj_center.y, tile_object.name)
+     
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 
@@ -151,6 +161,8 @@ class Game:
         self.night = False
         if self.game_volume > 0.0:
             self.effects_sounds['level_start'].play()
+        # -- minimap x gui setup --
+        self.mobile_minimap = Mobile_Minimap(self)    
         # -- misc --
         self.current_lock_time = 0 # needs to be initialised before starting
         self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
@@ -268,8 +280,15 @@ class Game:
                 sprite.draw_unit_name()
                 sprite.draw_unit_status()
                 sprite.draw_unit_level()
-            # -- draws every sprite in the `all_sprites` group
-            self.screen.blit(sprite.image, self.camera.apply(sprite))
+            # test                
+            if isinstance(sprite, Mobile_Minimap):
+                sprite.draw_player()
+                sprite.draw_walls()
+                self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
+                sprite.draw_time()
+            else:
+                # -- draws every sprite in the `all_sprites` group
+                self.screen.blit(sprite.image, self.camera.apply(sprite))
             # -- draw dev mode / debug mode rects, hit boxes, and info --
             if self.draw_debug:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1) # draw the objects hit rect
@@ -328,7 +347,7 @@ class Game:
         # handle events here
         for event in pg.event.get():
             # -- mouse events --           
-            if event.type == pg.MOUSEBUTTONUP:
+            if event.type == pg.MOUSEBUTTONUP: # <- own function duh
                 # try:
                     if self.check_mouse_click:
                         mouse_pos = pg.mouse.get_pos() # mays well define this here
@@ -343,7 +362,7 @@ class Game:
                             if selected_inventory_loot['is_stackable']:
                                 if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
                                     if self.temp_player_wallet > 0:
-                                        print(f"Stack da gold")
+                                        print(f"Stack da gold") # yeet the child
                                         self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
                                         self.last_undo_action = "g>g" # gold stacked on gold, no undo
                                     else:
@@ -395,9 +414,10 @@ class Game:
                     self.player.charging = 0 # should make a handler function for this now huh
                     self.player_undo = False
                     self.lootable_undo = False
-                if event.key == pg.K_i: # 'inventory' menu                
+                if event.key == pg.K_i: # 'inventory' menu   
+                    self.mobile_minimap.update_mobile_position(400)
                     # need to implement this
-                    ... # needs to be flags as cant use this event loop for drawing per frame remember 
+                    # ... # needs to be flags as cant use this event loop for drawing per frame remember 
 
     def handle_lootable_undo(self): 
         # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")

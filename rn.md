@@ -1,16 +1,18 @@
 
 [rn-rn]
-- yes i wanna do this phone thing but unsure how much tbf
-- start by actually just doing it here just be smart with it
-- start with just the phone
-- then blit the time static
-- then change the hour on button press
-- then hide the phone on button press
-- then the minimap basic og concept
-- then a potential improved concept
-    - oooooo
+- skipping advanced minimap concept as realised how much work it is
+- just guna finish minimap by doing
+- zombies 
+- top icons
+- booting sumnt cute 
+    - battery idea?
+- maybe basic ios menu concept with buttons only that click and show green or red screen (as could have stats n stuff here thats quite kewl)
 - then dynamic time
 - then add day night
+- then remaining ui then imo its just the polish
+- maybe companion too
+- gives a nice added polish with the conversations ngl
+    - and could randomise these at the start bosh
 
 
 
