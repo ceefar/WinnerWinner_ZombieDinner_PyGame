@@ -175,7 +175,7 @@ class Game:
                 Lootable(self, obj_center.x, obj_center.y, tile_object.name)
                 self.all_lootable_positions.append((obj_center.x, obj_center.y))
             if tile_object.name == 'workbench': 
-                self.temp_workbench = Workbench(self, obj_center.x, obj_center.y)
+                Workbench(self, obj_center.x, obj_center.y)
             
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
@@ -322,6 +322,12 @@ class Game:
             # -- draw dev mode / debug mode rects, hit boxes, and info --
             if self.draw_debug:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1) # draw the objects hit rect
+        
+        # -- test af --
+        test_arrow = Destination_Arrow(self)
+        # self.screen.blit(test_arrow.image, self.camera.apply_rect(test_arrow.rect))
+        print(f"{test_arrow.pos}, {self.player.pos}")
+
         # -- resets the chargebar if the player is out of range of any lootbox --
         if not is_near_loot:
             self.player.charging = 0
