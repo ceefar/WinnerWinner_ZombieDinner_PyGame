@@ -42,9 +42,18 @@ class Mobile_Minimap(pg.sprite.Sprite):
     def update(self):
         # simply gives us a fresh state every frame
         self.inner_screen_rect = pg.Rect(self.inner_screen_rect_x, self.inner_screen_rect_y, self.inner_screen_rect_width, self.inner_screen_rect_height)
-        screen_colour = GOOGLEMAPSBLUE if self.current_state == "minimap" else SKYBLUE
+        if self.current_state == "minimap":
+            screen_colour = GOOGLEMAPSBLUE  
+        elif self.current_state == "store":
+            screen_colour = TAN 
+        else: 
+            screen_colour = SKYBLUE
         self.inner_screen_rect = pg.draw.rect(self.image, screen_colour, self.inner_rect, 0, 20) 
         # self.image = self.og_image.copy() # < now the player cant walk off the 'edge' of the phone screen but if they could, or for another reason idk why yet but incase then do dis, basically just redraw the phone too, like we do for the inner screen rect above
+
+    def wipe_clicked_menu(self): 
+        if self.clicked_menu_id:
+            self.clicked_menu_id = False
 
     def check_click_home_icon(self):
         if self.current_state == "home":
@@ -55,8 +64,30 @@ class Mobile_Minimap(pg.sprite.Sprite):
                 if a_rect.collidepoint(mouse):
                     print(f"Clicked => {id_tuple}")
                     self.clicked_menu_id = id_tuple
+                    if id_tuple == (0,0):
+                        print(f"Load Store")
+                        self.wipe_clicked_menu()
+                        self.current_state = "store"
+                    if id_tuple == (0,1):
+                        print(f"Load Minimap")
+                        self.wipe_clicked_menu()
+                        self.current_state = "minimap"
+                        
+    def draw_store_page(self):
+        self.draw_home_button()
 
-    def draw_home_icons(self): # icon_type
+    def draw_home_button(self):
+        home_btn_size = 20
+        home_btn_rect = pg.Rect(32, 70, home_btn_size, home_btn_size)
+        pg.draw.rect(self.image, RED, home_btn_rect)
+        true_rect = home_btn_rect.copy()
+        true_rect.move_ip(self.x, self.y + self.drawered_difference)
+        if true_rect.collidepoint(pg.mouse.get_pos()):
+            if self.game.true_check_mouse_click:
+                print(f"Leaving {self.current_state}.\nLoading Home...\n")
+                self.current_state = "home"
+
+    def draw_home_icons(self):
         # photos, maps, store, camera, stats, settings, else?
         # yes just 3 is fine here
         # guna prerender the image with the text here to save blitting it
@@ -80,7 +111,7 @@ class Mobile_Minimap(pg.sprite.Sprite):
                 else:
                     icon_surface.fill(YELLOW)
                 self.image.blit(icon_surface, (icon_x + (icon_length * col) + (icon_padding * col) + nudge, row_y))    
-                icon_rect = pg.Rect((icon_x + (icon_length * col) + (icon_padding * col) + nudge) + self.x, row_y + self.y - 268, icon_length, icon_length) # is the drawer difference, guess ive forgotten to update it and it starts in the closed position lol, minor af 
+                icon_rect = pg.Rect((icon_x + (icon_length * col) + (icon_padding * col) + nudge) + self.x, row_y + self.y + self.drawered_difference, icon_length, icon_length) # - 268 is the drawer difference (so it does actually have to stay as plus), guess ive forgotten to update it and it starts in the closed position lol, minor af 
                 self.icons_rects_dict[(row, col)] = icon_rect
 
     def draw_time(self):
@@ -92,6 +123,7 @@ class Mobile_Minimap(pg.sprite.Sprite):
 
     def update_mobile_position(self, y_pos=500): # super temp implementation, just toggles the pos
         self.pos.y = y_pos if self.pos.y == self.shelved_y_pos else self.shelved_y_pos
+        self.drawered_difference = self.pos.y - self.shelved_y_pos # use this as it starts closed and we dont reset the pos just the rect (?)
     
     def draw_icons(self): # to section into own functions
         # -- battery --
@@ -106,7 +138,9 @@ class Mobile_Minimap(pg.sprite.Sprite):
     def draw_current_page(self):
         if self.current_state == "minimap":
             self.draw_minimap()
-        else:
+        elif self.current_state == "store":
+            self.draw_store_page()
+        elif self.current_state == "home":            
             self.draw_home_icons()
 
     def draw_minimap(self):

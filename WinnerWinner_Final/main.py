@@ -178,6 +178,7 @@ class Game:
         self.cheevo_counter = 0 # wanna replace this for just a close button on the achievement, for now its just a faux timer
         self.achievement_unlocks = False
         self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
+        self.true_check_mouse_click = False
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -354,57 +355,61 @@ class Game:
         for event in pg.event.get():
             # -- mouse events --           
             if event.type == pg.MOUSEBUTTONUP: # <- own function duh
-                
-                self.mobile_minimap.check_click_home_icon()
+                self.true_check_mouse_click = True
+                rv = self.mobile_minimap.check_click_home_icon()
+                print(self.mobile_minimap.current_state)
                 try:
-                    if self.check_mouse_click:
-                        mouse_pos = pg.mouse.get_pos() # mays well define this here
-                        # check click actions in either player inventory or lootable inventory menus
-                        selected_loot = self.player_inventory_menu.check_user_click_menu(mouse_pos)
-                        selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(mouse_pos)
-                        # check if player inventory menu has a clicked scroll button
-                        self.player_inventory_menu.check_user_click_menu_scroll(mouse_pos)
-                        # lootable inventory click actions
-                        if selected_inventory_loot:
-                            print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
-                            if selected_inventory_loot['is_stackable']:
-                                if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
-                                    if self.temp_player_wallet > 0:
-                                        print(f"Stack da gold") # yeet the child
-                                        self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
-                                        self.last_undo_action = "g>g" # gold stacked on gold, no undo
+                    if not rv:
+                        if self.check_mouse_click: # check_mouse_click # true_check_mouse_click
+                            mouse_pos = pg.mouse.get_pos() # mays well define this here
+                            # check click actions in either player inventory or lootable inventory menus
+                            selected_loot = self.player_inventory_menu.check_user_click_menu(mouse_pos)
+                            selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(mouse_pos)
+                            # check if player inventory menu has a clicked scroll button
+                            self.player_inventory_menu.check_user_click_menu_scroll(mouse_pos)
+                            # lootable inventory click actions
+                            if selected_inventory_loot:
+                                print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
+                                if selected_inventory_loot['is_stackable']:
+                                    if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
+                                        if self.temp_player_wallet > 0:
+                                            print(f"Stack da gold") # yeet the child
+                                            self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
+                                            self.last_undo_action = "g>g" # gold stacked on gold, no undo
+                                        else:
+                                            print(f"Add da gold")
+                                            self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                                     else:
-                                        print(f"Add da gold")
                                         self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                                 else:
                                     self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
-                            else:
-                                self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
-                            self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
-                            self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
-                            if not self.last_undo_action == "g>g": # since we set this before we have to make sure it doesnt get overwritten
-                                self.last_undo_action = "i>p"
-                        # player inventory click actions
-                        if selected_loot:
-                            print(f"Ladies & Gentleman, we got a YEET!\n=> {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
-                            selected_loot_id = selected_loot["loot_id"]
-                            del_index = 0
-                            for key, item in self.player.player_inventory.items():
-                                if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
-                                    del_index = key
-                            self.player_undo = {del_index:self.player.player_inventory[del_index]}
-                            self.player.player_inventory.pop(del_index)
-                            if not self.last_undo_action == "g>g":
-                                self.last_undo_action = "p>d"
-                            self.player_threw_gold = True
-                            for a_item_dict in self.player.player_inventory.values():
-                                if "gold" in a_item_dict["loot_type"]:
-                                    self.player_threw_gold = False
+                                self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
+                                self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
+                                if not self.last_undo_action == "g>g": # since we set this before we have to make sure it doesnt get overwritten
+                                    self.last_undo_action = "i>p"
+                            # player inventory click actions
+                            if selected_loot:
+                                print(f"Ladies & Gentleman, we got a YEET!\n=> {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
+                                selected_loot_id = selected_loot["loot_id"]
+                                del_index = 0
+                                for key, item in self.player.player_inventory.items():
+                                    if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
+                                        del_index = key
+                                self.player_undo = {del_index:self.player.player_inventory[del_index]}
+                                self.player.player_inventory.pop(del_index)
+                                if not self.last_undo_action == "g>g":
+                                    self.last_undo_action = "p>d"
+                                self.player_threw_gold = True
+                                for a_item_dict in self.player.player_inventory.values():
+                                    if "gold" in a_item_dict["loot_type"]:
+                                        self.player_threw_gold = False
                 # incase you click when the menu isnt up, can add a bool to supercede this shortly
                 except AttributeError as atrErr:
                     print(f"{atrErr = }")  
-                #     except TypeError as typErr:
-                #         print(f"{typErr = }")                   
+                # #     except TypeError as typErr:
+                # #         print(f"{typErr = }")   
+            else:
+                self.true_check_mouse_click = False                
             # -- quit event --
             if event.type == pg.QUIT:
                 self.quit()
@@ -426,7 +431,9 @@ class Game:
                     self.mobile_minimap.update_mobile_position(400)
                 if event.key == pg.K_o: # temp for changing mobile menus
                     mobile_page = self.mobile_minimap.current_state
-                    self.mobile_minimap.current_state = "home" if mobile_page == "minimap" else "minimap"
+                    # toggle o just always takes us home
+                    if mobile_page != "home":
+                        self.mobile_minimap.current_state = "home"
                     
                     # need to implement this
                     # ... # needs to be flags as cant use this event loop for drawing per frame remember 

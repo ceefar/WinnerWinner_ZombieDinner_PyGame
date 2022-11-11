@@ -18,6 +18,9 @@ just guna finish minimap by...
     - maps transition [skipped]
 [done]
 
+# random side project
+# some bot that updates my profile readme.md based on my most recent commits would be giga kewl
+# could use some kinda pillow for images too ngl
 
 
 [to-finish-scroll-arrows-for-now]
