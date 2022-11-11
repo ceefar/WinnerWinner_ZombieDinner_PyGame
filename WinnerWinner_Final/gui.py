@@ -41,7 +41,6 @@ class Mobile_Minimap(pg.sprite.Sprite):
         # 
         self.home_btn_pos = (32, 70)
 
-
     def update(self):
         # simply gives us a fresh state every frame
         self.inner_screen_rect = pg.Rect(self.inner_screen_rect_x, self.inner_screen_rect_y, self.inner_screen_rect_width, self.inner_screen_rect_height)
