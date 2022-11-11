@@ -1,8 +1,28 @@
 
+
+[current-updated-todo]
+- day and night working
+    - added to phone too with simple alarm screen tho not rnrn lol, do timezones, the lot, fuck it lmao 
+- moving menu issue
+- omg 100% asap test
+    - different zones with different maps loading, if this is even possible which obvs it is but i mean can i do it myself easily enough
+    - add this to phone minimap
+        - the name of ur zone and the next zone name on the edge of the map vertically (rotated not literally vertically)
+        - would then plan to just do the area in faux style
+            - tho a refactor too get it to do properly with scrolling, masked map would be amazing ngl, but soooo long and unnecessary lmao
+    - if the arrows work use them for this too, pointing to the mid point or any specific entry point, e.g. a building doors oooo 
+- workbench 
+- on screen objective x workbench arrow/s concept
+- mobile icons need text and obvs the rest of the icons lol
+- mobile transitions like on and off, booting, battery, etc
+
+[to-finish-store]
+- 100% guna want click and throw/flick to scroll the store items, this is easier than it shoulds but does need improved tracking of mouse click states
+- add offer to store
+
 [rn-rn]
 just guna finish minimap by...
-- booting sumnt cute 
-    - amazon
+- store
 - zombies to minimap 
     - the lightweight way
 - then dynamic time
@@ -16,6 +36,7 @@ just guna finish minimap by...
 [part-done]
 - toggle between map and home 
     - maps transition [skipped]
+- amazon, just started
 [done]
 
 # random side project

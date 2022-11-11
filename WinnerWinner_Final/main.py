@@ -90,6 +90,7 @@ class Game:
         self.FONT_SILK_REGULAR_14 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 14)
         self.FONT_SILK_REGULAR_16 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 16)
         self.FONT_SILK_REGULAR_18 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 18)
+        self.FONT_SILK_REGULAR_20 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 20)
         self.FONT_SILK_REGULAR_22 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 22)
         self.FONT_SILK_REGULAR_24 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 24)
         self.FONT_SILK_REGULAR_32 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 32)
@@ -123,6 +124,16 @@ class Game:
         self.battery_empty_img = pg.transform.scale(self.battery_empty_img, (34, 18))
         self.battery_blank_img = pg.image.load(path.join(img_folder, BATTERY_BLANK_IMG)).convert_alpha()
         self.battery_blank_img = pg.transform.scale(self.battery_blank_img, (34, 18))
+        # -- home --
+        self.shopping_icon_mobile_img = pg.image.load(path.join(img_folder, SHOPPING_ICON_MOBILE_IMG)).convert_alpha()
+        self.shopping_icon_mobile_img = pg.transform.scale(self.shopping_icon_mobile_img, (73, 73))
+        self.maps_icon_mobile_img = pg.image.load(path.join(img_folder, MAPS_ICON_MOBILE_IMG)).convert_alpha()
+        self.maps_icon_mobile_img = pg.transform.scale(self.maps_icon_mobile_img, (73, 73))
+        # -- store --
+        self.store_item_casino_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_CASINO)).convert_alpha()
+        self.store_item_casino_img = pg.transform.scale(self.store_item_casino_img, (56, 56))
+        self.store_item_weapon_upgrade_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_WEAPON_UPGRADE)).convert_alpha()
+        self.store_item_weapon_upgrade_img = pg.transform.scale(self.store_item_weapon_upgrade_img, (56, 56))
         
     def new(self):
         # initialize all variables and do all the setup for a new game
@@ -356,10 +367,10 @@ class Game:
             # -- mouse events --           
             if event.type == pg.MOUSEBUTTONUP: # <- own function duh
                 self.true_check_mouse_click = True
-                rv = self.mobile_minimap.check_click_home_icon() # ik
+                clicked_home_icon = self.mobile_minimap.check_click_home_buttons() # ik
                 try: 
-                    if not rv:
-                        if self.check_mouse_click: # check_mouse_click # true_check_mouse_click
+                    if not clicked_home_icon:
+                        if self.check_mouse_click: 
                             mouse_pos = pg.mouse.get_pos() # mays well define this here
                             # check click actions in either player inventory or lootable inventory menus
                             selected_loot = self.player_inventory_menu.check_user_click_menu(mouse_pos)
@@ -368,15 +379,12 @@ class Game:
                             self.player_inventory_menu.check_user_click_menu_scroll(mouse_pos)
                             # lootable inventory click actions
                             if selected_inventory_loot:
-                                print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
                                 if selected_inventory_loot['is_stackable']:
                                     if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
-                                        if self.temp_player_wallet > 0:
-                                            print(f"Stack da gold") # yeet the child
+                                        if self.temp_player_wallet > 0:                                        
                                             self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
                                             self.last_undo_action = "g>g" # gold stacked on gold, no undo
                                         else:
-                                            print(f"Add da gold")
                                             self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                                     else:
                                         self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
@@ -388,7 +396,6 @@ class Game:
                                     self.last_undo_action = "i>p"
                             # player inventory click actions
                             if selected_loot:
-                                print(f"Ladies & Gentleman, we got a YEET!\n=> {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
                                 selected_loot_id = selected_loot["loot_id"]
                                 del_index = 0
                                 for key, item in self.player.player_inventory.items():

@@ -144,6 +144,12 @@ MOBILE_IMG = "mobile_1.png" # nokia_1
 BATTERY_FULL_IMG = "battery_full_1.png"
 BATTERY_EMPTY_IMG = "battery_empty_1.png"
 BATTERY_BLANK_IMG = "battery_blank_1.png"
+MAPS_ICON_MOBILE_IMG = "MapsIcon.png"
+SHOPPING_ICON_MOBILE_IMG = "ShoppingIcon.png"
+STORE_ITEM_IMG_CASINO = "store_item_casino_1.png"
+STORE_ITEM_IMG_HANDGUN = "store_item_handgun_1.png"
+STORE_ITEM_IMG_LOOTBOX = "store_item_lootbox_1.png"
+STORE_ITEM_IMG_WEAPON_UPGRADE = "store_item_weapon_upgrade_1.png"
 
 # General Handy Stuff
 def round_to_base(x, base=5): 

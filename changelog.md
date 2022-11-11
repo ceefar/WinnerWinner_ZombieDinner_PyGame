@@ -75,7 +75,7 @@
 - reverted slightly due to scrollbar issues
 - tested out a `grappling` concept that i will now be adding later on as it can be implemented quite easily
 
-# v1.05 10/11
+# v1.05 x v1.051 x v1.052 10/11
 [half-day-as-had-drs-apt-n-ting]
 - absolutely just had a load of things about classes and oop class structure twig in my head
 - started on a concept gui but only partly doing it as is diminising returns
@@ -84,3 +84,11 @@
 - added loot using the setup/init loop to avoid excess reptition 
 - home page toggle initial setup
 - home page clickable setup working
+- clean home button function x functionality working across all pages 
+- fixed some bugs with mouse click state issues across multiple menu types
+- basic store front layout mockup
+
+# v1.052 11/11
+[clapping]
+- feel like ive had huge learning breakthroughs, particularly in oop, over the last two days
+- added maps and home icons and polished the mobile menu functionality a tad 
