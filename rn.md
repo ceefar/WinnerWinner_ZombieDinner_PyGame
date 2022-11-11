@@ -1,7 +1,11 @@
 
 [rn-rn-rn]
-- test workbench arrow ting
-- do day night and work bench and menu position fix and zones (basically below lmao - but preferably just these, feel free to choose the order u want tho)
+- do day night and work bench and menu position fix and map zones (basically below lmao - but preferably just these, feel free to choose the order u want tho)
+- i say try zones first as is most interesting
+- then consider menu fix but probs just go to...
+- workbench
+- then day and night
+- then that menu fix
 
 [current-updated-todo]
 - day and night working
