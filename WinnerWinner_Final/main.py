@@ -316,7 +316,7 @@ class Game:
             if isinstance(sprite, Workbench):
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
                 did_outline = sprite.outline_mask(self.camera.apply_rect(sprite.rect), 5)
-                if did_outline:
+                if did_outline: 
                     self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)
                     self.draw_player_inventory()
             else:
