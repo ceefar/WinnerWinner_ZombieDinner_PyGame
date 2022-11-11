@@ -105,7 +105,7 @@ class Mobile_Minimap(pg.sprite.Sprite):
             pg.draw.rect(self.image, BLACK, test_button_rect, 4, 4)
             pg.draw.rect(self.image, BLACK, test_button_rect_2, 4, 4)
             # item images
-            item_image_surf = pg.Surface((56, 56))
+            item_image_surf = pg.Surface((56, 56)).convert_alpha()
             item_image_surf.fill(BLUEMIDNIGHT)
             item_image_surf.blit(self.game.store_item_weapon_upgrade_img, (0,0))
             self.image.blit(item_image_surf, pg.Rect(store_item_title_pos_x - 70, store_item_title_pos_y, 56, 56))

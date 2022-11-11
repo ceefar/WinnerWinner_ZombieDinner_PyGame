@@ -139,6 +139,9 @@ LOOT_BOX_4_IMG = 'lootable_box_4.png'
 LOOT_BOX_5_IMG = 'lootable_box_5.png'
 LOOT_BOX_6_IMG = 'lootable_box_6.png'
 
+# New Concept Testing - Workbench
+WORKBENCH_IMG = 'workbench_concept_3.png' # workbench_concept_1
+
 # UI - Mobile Minimap
 MOBILE_IMG = "mobile_1.png" # nokia_1
 BATTERY_FULL_IMG = "battery_full_1.png"

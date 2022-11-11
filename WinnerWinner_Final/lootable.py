@@ -3,6 +3,36 @@ from settings import *
 from random import randint, choice, choices
    
    
+# guna move this to own class and do properly, just quickly testing the implementation im thinking of before commiting
+
+class Workbench(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        # -- general setup --
+        self._layer = ITEMS_LAYER # need to sort the layering for this and the menus tbf, likely own layer
+        self.groups = game.workbenches, game.all_sprites, game.walls # confirm if we want/need all of these here btw
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.pos = vec(x, y)
+        # -- rect setup stuff --
+        self.image = self.game.workbench_img # < temp af obvs
+        #self.image.fill(TAN)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.hit_rect = self.rect
+
+    def outline_mask(self, loc, thickness=3, colr=GREEN):
+        workbench_to_player_distance = (self.pos - self.game.player.pos).length()
+        if workbench_to_player_distance <= 100: # no need to calculate the mask if we arent close enough to blit it
+            mask = pg.mask.from_surface(self.image)
+            mask_outline = mask.outline()
+            n = 0
+            for point in mask_outline:
+                mask_outline[n] = point[0] + loc[0], point[1] + loc[1]
+                n += 1
+            pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
+
+
+
 class Lootable(pg.sprite.Sprite):
     loot_counter = 220 # for counting every individual piece of loot created at any given lootable
 
@@ -202,10 +232,9 @@ class Lootable(pg.sprite.Sprite):
     # note have removed sub type
 
     def get_a_loot(self):
-        final_return_dict = {}
-        print(f"\n- - - - - - \nCreating New Loot - {self.my_id} {self.my_size} {self.rarity}")
+        final_return_dict = {} # print(f"\n- - - - - - \nCreating New Loot - {self.my_id} {self.my_size} {self.rarity}")
         for _ in range(self.my_size): 
-            # create id 
+            # create id for inidividual piece of loot 
             Lootable.loot_counter += 1
             loot_item_id = Lootable.loot_counter
             loot_item_details_dict = {"loot_id": loot_item_id} # fill this up as we go, its the inner nested dict which is a value to the key id
@@ -237,9 +266,7 @@ class Lootable(pg.sprite.Sprite):
                 loot_item_details_dict["is_stackable"] = False
             # finally nest dem all
             loot_item_dict = {loot_item_id: loot_item_details_dict}
-            print(f"{loot_item_dict = }")   
             final_return_dict[loot_item_id] = loot_item_details_dict
-        print(f"- - - - - - \n{final_return_dict = }\n- - - - - - \n")   
         return final_return_dict
 
         # {"loot_name":"gold", "loot_type":"gold", "loot_value":420, "loot_rarity":1, "loot_rect": False}

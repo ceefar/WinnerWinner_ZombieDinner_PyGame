@@ -1,4 +1,7 @@
 
+[rn-rn-rn]
+- test workbench arrow ting
+- do day night and work bench and menu position fix and zones (basically below lmao - but preferably just these, feel free to choose the order u want tho)
 
 [current-updated-todo]
 - day and night working

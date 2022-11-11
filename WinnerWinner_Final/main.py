@@ -6,7 +6,7 @@ from zombie import *
 from settings import *
 from sprites import *
 from tilemap import *
-from lootable import Lootable
+from lootable import Lootable, Workbench
 from player import Player
 from gui import Mobile_Minimap
 from menus import Inventory_Menu, Lootable_Menu, Achievement
@@ -134,6 +134,9 @@ class Game:
         self.store_item_casino_img = pg.transform.scale(self.store_item_casino_img, (56, 56))
         self.store_item_weapon_upgrade_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_WEAPON_UPGRADE)).convert_alpha()
         self.store_item_weapon_upgrade_img = pg.transform.scale(self.store_item_weapon_upgrade_img, (56, 56))
+        # -- workbench concept test --        
+        self.workbench_img = pg.image.load(path.join(img_folder, WORKBENCH_IMG)).convert_alpha()
+        self.workbench_img = pg.transform.scale(self.workbench_img, (128, 48))
         
     def new(self):
         # initialize all variables and do all the setup for a new game
@@ -147,6 +150,8 @@ class Game:
         self.lootables = pg.sprite.Group()
         self.menus = pg.sprite.Group()
         self.minimaps = pg.sprite.Group()
+        # quick test
+        self.workbenches = pg.sprite.Group()
         # -- current level map setup -- 
         self.map = TiledMap(path.join(self.map_folder, 'level_large.tmx'))
         self.map_img = self.map.make_map()
@@ -169,6 +174,9 @@ class Game:
             if tile_object.name == 'lootable_box_small': 
                 Lootable(self, obj_center.x, obj_center.y, tile_object.name)
                 self.all_lootable_positions.append((obj_center.x, obj_center.y))
+            if tile_object.name == 'workbench': 
+                Workbench(self, obj_center.x, obj_center.y)
+            
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 
@@ -305,7 +313,9 @@ class Game:
                 self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
                 sprite.draw_time()
                 sprite.draw_icons()
-                # self.check_mouse_click = True
+            if isinstance(sprite, Workbench):
+                self.screen.blit(sprite.image, self.camera.apply(sprite))
+                sprite.outline_mask(self.camera.apply_rect(sprite.rect), 5)
             else:
                 # -- draws every sprite in the `all_sprites` group
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
