@@ -175,7 +175,7 @@ class Game:
                 Lootable(self, obj_center.x, obj_center.y, tile_object.name)
                 self.all_lootable_positions.append((obj_center.x, obj_center.y))
             if tile_object.name == 'workbench': 
-                Workbench(self, obj_center.x, obj_center.y)
+                self.temp_workbench = Workbench(self, obj_center.x, obj_center.y)
             
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
