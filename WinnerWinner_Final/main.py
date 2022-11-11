@@ -356,9 +356,8 @@ class Game:
             # -- mouse events --           
             if event.type == pg.MOUSEBUTTONUP: # <- own function duh
                 self.true_check_mouse_click = True
-                rv = self.mobile_minimap.check_click_home_icon()
-                print(self.mobile_minimap.current_state)
-                try:
+                rv = self.mobile_minimap.check_click_home_icon() # ik
+                try: 
                     if not rv:
                         if self.check_mouse_click: # check_mouse_click # true_check_mouse_click
                             mouse_pos = pg.mouse.get_pos() # mays well define this here
