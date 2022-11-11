@@ -1,9 +1,15 @@
 
+[oof-try-later-tho-not-rn]
+- hate to say it but id love to test this quickly in v1.061 again
+    - draw the arrow on the workbench
+    - set the pos to update all time to max screen height screen width -/+ image size (so its on screen at the edges)
+        - i swear that should just work tho
+
 [rn-rn-rn]
-- do day night and work bench and menu position fix and map zones (basically below lmao - but preferably just these, feel free to choose the order u want tho)
-- i say try zones first as is most interesting
+- do a bit on workbench since youve started now and it is kinda fun
+- then just really quickly in a new folder **try** zones
 - then consider menu fix but probs just go to...
-- workbench
+- then finish up workbench
 - then day and night
 - then that menu fix
 

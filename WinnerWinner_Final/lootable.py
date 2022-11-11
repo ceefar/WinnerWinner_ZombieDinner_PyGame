@@ -22,7 +22,7 @@ class Workbench(pg.sprite.Sprite):
 
     def outline_mask(self, loc, thickness=3, colr=GREEN):
         workbench_to_player_distance = (self.pos - self.game.player.pos).length()
-        if workbench_to_player_distance <= 100: # no need to calculate the mask if we arent close enough to blit it
+        if workbench_to_player_distance <= 120: # no need to calculate the mask if we arent close enough to blit it
             mask = pg.mask.from_surface(self.image)
             mask_outline = mask.outline()
             n = 0
@@ -30,7 +30,9 @@ class Workbench(pg.sprite.Sprite):
                 mask_outline[n] = point[0] + loc[0], point[1] + loc[1]
                 n += 1
             pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
-
+            return True
+        else:
+            return False  
 
 
 class Lootable(pg.sprite.Sprite):

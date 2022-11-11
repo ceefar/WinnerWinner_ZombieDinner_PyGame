@@ -315,18 +315,16 @@ class Game:
                 sprite.draw_icons()
             if isinstance(sprite, Workbench):
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
-                sprite.outline_mask(self.camera.apply_rect(sprite.rect), 5)
+                did_outline = sprite.outline_mask(self.camera.apply_rect(sprite.rect), 5)
+                if did_outline:
+                    self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)
+                    self.draw_player_inventory()
             else:
                 # -- draws every sprite in the `all_sprites` group
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
             # -- draw dev mode / debug mode rects, hit boxes, and info --
             if self.draw_debug:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1) # draw the objects hit rect
-        
-        # -- test af --
-        test_arrow = Destination_Arrow(self)
-        # self.screen.blit(test_arrow.image, self.camera.apply_rect(test_arrow.rect))
-        print(f"{test_arrow.pos}, {self.player.pos}")
 
         # -- resets the chargebar if the player is out of range of any lootbox --
         if not is_near_loot:

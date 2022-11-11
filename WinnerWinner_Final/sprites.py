@@ -27,26 +27,6 @@ def collide_with_walls(sprite, group, dir):
             sprite.vel.y = 0
             sprite.hit_rect.centery = sprite.pos.y
 
-# -- super quick test for destination arrow -- 
-
-class Destination_Arrow(pg.sprite.Sprite): # < should 100% be called Point_Of_Interest duhh
-    def __init__(self, game):
-        self._layer = BULLET_LAYER
-        self.groups = game.all_sprites
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((20,20))
-        self.image.fill(MAGENTA)
-        self.rect = self.image.get_rect()
-        self.pos = vec(self.game.player.pos.x + 50, self.game.player.pos.y + 50)
-        self.rect.center = self.pos
-        dir = vec(1, 0).rotate(-self.game.player.rot)
-        self.vel = dir * 100
-    
-    def update(self):
-        self.pos += self.vel # * self.game.dt
-        self.rect.center = self.pos
-
 # -- sprite classes --
 
 class Bullet(pg.sprite.Sprite):
