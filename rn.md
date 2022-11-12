@@ -1,16 +1,37 @@
+[refactoring-minimap]
+- yup just realised duh, its a minimap sure but its on mobile so it should be like the game with the character fixed at the center pos
+- its a pretty big refactor but guna see if i can do it quickly now 
+[quick-notes]
+ - have amazon prime drones deliver ur product to random drop zone lockers (it glitches out)
+    - actually really like this, adds a lot of polish and completeness too, and can do a lot with the drone via transform.scale 
+    - things u buy can be things that u can also craft duh, i mean just generally makes it easier 
+ - make workbench simple, just upgrades, use parts like steel, other things can be broken down to parts like steel maybe
 
-[oof-try-later-tho-not-rn]
-- hate to say it but id love to test this quickly in v1.061 again
-    - draw the arrow on the workbench
-    - set the pos to update all time to max screen height screen width -/+ image size (so its on screen at the edges)
-        - i swear that should just work tho
+[so-for-amazon-prime-lockers-and-drones-lol]
+- last major addition but tbf had been considering it for a while, now have cut some other stuff guna add it
+- would be good to have the zone too obvs but probs wont have implemented that by then
+- ok also maybe companion too but thats already done so imo its free, just needs a refactor
+
+[start-this-asap]
+- start semi documenting things in sections in a private repo for the readme, just keep running notes like the changelog
+
+[oh-snap]
+- right align the wallet in store!
+    - just figure out how to actually use align for this bosh
+- skooch the minimap display down as its now clipping at the top where its capped but its too high - go to the workbench and see... or move the building down lmao
+
+[so-for-workbench]
+- new unique workbench ui with clothing slots and player stats x abilities x whatever else 
+- obvs also only the valid items showing idea
+- the smaller tighter ui for it but still finding space for the other stuff or add/try menu page toggle
+- some super basic crafting
 
 [rn-rn-rn]
 - do a bit on workbench since youve started now and it is kinda fun
-- then just really quickly in a new folder **try** zones
-- then consider menu fix but probs just go to...
-- then finish up workbench
 - then day and night
+- then finish up workbench
+- then try a proper zone?!
+    - oooOooOOoOOoOoo
 - then that menu fix
 
 [current-updated-todo]
@@ -46,11 +67,19 @@ just guna finish minimap by...
 - maybe companion too
     - gives a nice added polish with the conversations ngl
         - and could randomise these at the start bosh
-[part-done]
+
+[part-done-x-done]
 - toggle between map and home 
     - maps transition [skipped]
 - amazon, just started
-[done]
+- dumb af for minimap use images or letters with outline like gta
+
+[oof-try-later-tho-not-rn]
+- hate to say it but id love to test this quickly in v1.061 again
+    - draw the arrow on the workbench
+    - set the pos to update all time to max screen height screen width -/+ image size (so its on screen at the edges)
+        - i swear that should just work tho
+
 
 # random side project
 # some bot that updates my profile readme.md based on my most recent commits would be giga kewl
