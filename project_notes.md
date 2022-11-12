@@ -1,5 +1,20 @@
+** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
+
+
+[saturday-flow]
+- lockers with the requirement to go thru phone and use a code to unlock
+- refactor Workbench to make it a child of Menuable
+
 [today]
-- zones and locker and map style minimap
+- first
+- locker and drones and ordering
+    - you 100% should be able to follow the drone on the map omg <3
+    - its guna be near the camera so add a faux depth by using transform.scale on the drone image
+- and then
+- zones and minimap new concept
+- and then
+- get the drone on that too moving and showing up as a waypoint on where it will be going to
+- then <3
 
 [quick-notes]
  - have amazon prime drones deliver ur product to random drop zone lockers (it glitches out)

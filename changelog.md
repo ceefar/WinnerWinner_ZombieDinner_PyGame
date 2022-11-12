@@ -95,3 +95,10 @@
 - basic test af implementation of changing zone at map edge, tho implemented on button press while testing 
     - when doing this properly obvs need to have the player stats persisting so will need to refactor to pass the player between levels (which is fine)
 - improved the minimap display to gta style icons
+
+# v1.07 and v1.071
+[still-clapping-main-flow-plus-testing-branches-too]
+- tested concept for new full screen minimap, will be implementing shortly
+- delivery locker initial test implementation
+- refactoring Lootable class structure into Menuable parent child class based structure
+    - with first child being the delivery locker (rest will be lootable and workbench)

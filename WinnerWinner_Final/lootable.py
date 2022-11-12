@@ -4,6 +4,77 @@ from random import randint, choice, choices
    
    
 # guna move this to own class and do properly, just quickly testing the implementation im thinking of before commiting
+# 100% when refactoring have a Menuable parent class for lootable, workbench, and delivery locker
+
+# [ CRIT! ] - need to add Menuable() group if keeping this new parent implementation btw
+class Menuable(pg.sprite.Sprite): # New! - test implementation of parent class for on map objects with menu actions
+    def __init__(self, game, x, y, orientation="x"):
+        # -- general setup --
+        self._layer = ITEMS_LAYER # need to sort the layering for this and the menus tbf, likely own layer
+        self.groups = game.menuables, game.all_sprites, game.walls # confirm if we want/need all of these here btw
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.pos = vec(x, y)
+        # -- setup image based on the instance type --
+        if isinstance(self, Delivery_Locker):
+            if orientation == "x":
+                self.image = pg.Surface((128, 48))
+            else:            
+                self.image = pg.Surface((48, 128))
+        # -- rect setup stuff --        
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.hit_rect = self.rect
+
+    def outline_mask(self, loc, thickness=3): 
+        object_to_player_distance = (self.pos - self.game.player.pos).length()
+        if isinstance(self, Delivery_Locker): # will add the rest when i fully implement the parent child class structure here shortly, otherwise would make this ternary
+            colr = SKYBLUE
+        else:
+            colr = GREEN
+        # no need to calculate the mask, etc if we arent close enough to blit it
+        if object_to_player_distance <= 120: 
+            mask = pg.mask.from_surface(self.image)
+            mask_outline = mask.outline()
+            n = 0
+            for point in mask_outline:
+                mask_outline[n] = point[0] + loc[0], point[1] + loc[1]
+                n += 1
+            pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
+            return True # validates automatically opening menus when near the menuable - i actually like this so keep it but add C to close
+        else:
+            return False  
+
+
+# - have any bs menu show up when near it
+# - like for now just a box that says unopened or empty... maybe for proper it just shows all the lockers in rect, or whatever tho tbf idc
+# - add functionality that links it to mobile, you have to go to a mobile page and enter your code
+#   - it has copy code like on android keyboard? (maybe later lol, *not* rn pls)
+# - once you press enter it will then add the brought item to this empty x unopened menu
+#   - yh defo just like a little safe img thats locked and then pops open or whatever and u click ur item to add it
+
+# - imo do these but defo new branches
+#   - then imo quickly hop to draw on floor + zones with persitence
+#   - then imo quickly try new map menu idea
+
+# - then have some super basic crafting sumnt ?!
+
+# - then probs should just quickly refactor Workbench to make it a Menuable
+#   - especially before adding any additional complexities to either ffs!
+
+# - also need to start amazon store asap then btw
+# - no need to be fancy just make it quick, but defo have add to cart and little cart bottom sticky bar 
+
+
+class Delivery_Locker(Menuable):
+    def __init__(self, game, x, y, orientation): 
+        super().__init__(game, x, y, orientation)
+        self.groups = game.menuables, game.walls, game.delivery_lockers # confirm if we want/need all of these here btw
+        pg.sprite.Sprite.__init__(self, self.groups)
+        
+
+
+
 
 class Workbench(pg.sprite.Sprite):
     def __init__(self, game, x, y):
@@ -33,6 +104,9 @@ class Workbench(pg.sprite.Sprite):
             return True
         else:
             return False  
+
+
+
 
 
 class Lootable(pg.sprite.Sprite):
