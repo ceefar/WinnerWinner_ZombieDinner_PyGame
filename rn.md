@@ -1,6 +1,6 @@
-[refactoring-minimap]
-- yup just realised duh, its a minimap sure but its on mobile so it should be like the game with the character fixed at the center pos
-- its a pretty big refactor but guna see if i can do it quickly now 
+[today]
+- zones and locker and map style minimap
+
 [quick-notes]
  - have amazon prime drones deliver ur product to random drop zone lockers (it glitches out)
     - actually really like this, adds a lot of polish and completeness too, and can do a lot with the drone via transform.scale 
