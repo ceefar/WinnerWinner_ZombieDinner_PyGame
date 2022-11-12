@@ -187,7 +187,10 @@ class Game:
             if tile_object.name == 'workbench': 
                 Workbench(self, obj_center.x, obj_center.y)
             if tile_object.name == "locker_y":
-                Delivery_Locker(self, obj_center.x, obj_center.y, orientation="y")
+                a_locker = Delivery_Locker(self, obj_center.x, obj_center.y, orientation="y")
+                self.locker_location = a_locker # temp af
+            if tile_object.name == "drone":
+                Drone(self, obj_center.x, obj_center.y)
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 

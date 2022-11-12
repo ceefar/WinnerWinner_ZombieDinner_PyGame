@@ -2,8 +2,10 @@
 
         
 # rn
-# have press buy it now on mobile send a drone here that then just auto unlocks the box and user can add what was there too their inventory
-# if u can get this done cleanly and quickly rnrn its so much bosh
+# aite we doing drones again yolo
+# do zones
+# do proper map
+# do ordering with add to cart
 
 
 [saturday-flow]

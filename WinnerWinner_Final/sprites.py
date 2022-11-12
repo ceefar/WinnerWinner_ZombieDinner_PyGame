@@ -106,3 +106,42 @@ class Item(pg.sprite.Sprite):
         if self.step > BOB_RANGE:
             self.step = 0
             self.dir *= -1
+
+
+
+# -- quick test for drone --
+class Drone(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self._layer = ITEMS_LAYER
+        self.groups = game.all_sprites # game.drones
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        # -- object shapes and images --
+        self.image = pg.Surface((30, 30))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.hit_rect = self.rect.copy()
+        self.hit_rect.center = self.rect.center
+        # -- movement --
+        self.pos = vec(x, y)
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.speed = 100
+        self.target = game.locker_location
+        self.target_dist = self.target.pos - self.pos
+        self.rot = self.target_dist.angle_to(vec(1, 0))
+
+    def update(self):
+
+        self.rect.center = self.pos
+        self.acc = vec(1, 0).rotate(-self.rot)
+        self.acc.scale_to_length(self.speed)
+        self.acc += self.vel * -1
+        self.vel += self.acc * self.game.dt
+        self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+        self.hit_rect.centerx = self.pos.x # < probably not needed so delete both ?        
+        self.hit_rect.centery = self.pos.y
+        self.rect.center = self.hit_rect.center
+        print(f"{}, {self.pos = }, {self.target.pos = }")
+        
