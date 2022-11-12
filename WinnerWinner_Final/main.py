@@ -323,10 +323,13 @@ class Game:
                                 self.check_mouse_click = True # could rename this to menu_is_open_check_click for clarity but is a bit wordy huh          
             # -- New Delivery Locker initial test implementation --     
             if isinstance(sprite, Delivery_Locker):
-                sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
-                self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                # draw the delivery locker position to the map using the workbench method temporarily (just means the icon is wrong)
+                if self.mobile_minimap.current_state == "minimap":
+                    self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                # if you are near a delivery locker, draw the locker menu and highlight its image 
                 player_distance = (sprite.pos - self.player.pos).length()
                 if player_distance < 120:
+                    sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
                     self.delivery_locker_menu.draw(sprite)
             # -- Mobile Minimap initial test implementation --                 
             if isinstance(sprite, Mobile_Minimap):

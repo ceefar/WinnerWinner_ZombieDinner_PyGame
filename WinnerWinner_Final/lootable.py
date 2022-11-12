@@ -53,8 +53,9 @@ class Delivery_Locker(Menuable):
         super().__init__(game, x, y, orientation)
         self.groups = game.menuables, game.walls, game.delivery_lockers # confirm if we want/need all of these here btw
         pg.sprite.Sprite.__init__(self, self.groups)
+        # GUNA NEED AN ID ASAP!
 
-        
+
 # rn
 # have press buy it now on mobile send a drone here that then just auto unlocks the box and user can add what was there too their inventory
 # if u can get this done cleanly and quickly rnrn its so much bosh

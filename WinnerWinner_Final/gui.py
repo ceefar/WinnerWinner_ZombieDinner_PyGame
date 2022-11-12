@@ -77,7 +77,7 @@ class Mobile_Minimap(pg.sprite.Sprite):
         store_subtitle = self.game.FONT_SILK_REGULAR_14.render(f"Prime", True, WHITE)
         store_wallet_title = self.game.FONT_SILK_REGULAR_12.render(f"Your Balance", True, GREEN) # if gold >= ..., allow negative balance up to X? (process refund lol)
         store_wallet_balance = self.game.FONT_SILK_REGULAR_14.render(f"${self.game.temp_player_wallet:.2f}", True, GREEN) # if gold >= ..., allow negative balance up to X? (process refund lol)
-        store_item = self.game.FONT_SILK_REGULAR_22.render(f"Upgrade Item", True, WHITE)
+        store_item = self.game.FONT_SILK_REGULAR_22.render(f"Weapon Item", True, WHITE)
         store_item_price = self.game.FONT_SILK_REGULAR_16.render(f"$195.00", True, GREEN)
         # -- title --
         self.image.blit(store_title, (60, self.home_btn_pos[1] - 5)) # 90
@@ -98,11 +98,22 @@ class Mobile_Minimap(pg.sprite.Sprite):
             store_item_price_pos_y = item_start_y + (store_item.get_height() - 5) + (increment_y * i)
             self.image.blit(store_item, (store_item_title_pos_x, store_item_title_pos_y)) 
             self.image.blit(store_item_price, (store_item_price_pos_x, store_item_price_pos_y)) 
+
             # buy x add to cart buttons
-            test_button_rect = pg.Rect(store_item_price_pos_x, store_item_price_pos_y + 30, 80, 35)
-            test_button_rect_2 = pg.Rect(store_item_price_pos_x + 100, store_item_price_pos_y + 30, 80, 35)
-            pg.draw.rect(self.image, BLACK, test_button_rect, 4, 4)
-            pg.draw.rect(self.image, BLACK, test_button_rect_2, 4, 4)
+            buy_now_test_button_rect = pg.Rect(store_item_price_pos_x, store_item_price_pos_y + 30, 80, 35)
+            add_to_cart_test_button_rect = pg.Rect(store_item_price_pos_x + 100, store_item_price_pos_y + 30, 80, 35)
+
+            pg.draw.rect(self.image, BLACK, buy_now_test_button_rect, 4, 4)
+            pg.draw.rect(self.image, BLACK, add_to_cart_test_button_rect, 4, 4)
+            true_buy_now_rect = buy_now_test_button_rect.copy()
+            true_buy_now_rect.move_ip(self.pos.x, self.pos.y)
+            # -- draws a highlight around buy it now on hover, should really be a function --
+            if true_buy_now_rect.collidepoint(pg.mouse.get_pos()):                
+                pg.draw.rect(self.image, YELLOW, buy_now_test_button_rect, 4, 4) 
+                if self.game.true_check_mouse_click:
+                    print(f"\nShow Confirmation, Send Notification For Location, Deduct Cost, Send Drone")
+                    print(f"Send Drone")    
+                    self.game.true_check_mouse_click = False
             # item images
             item_image_surf = pg.Surface((56, 56)).convert_alpha()
             item_image_surf.fill(BLUEMIDNIGHT)
@@ -156,15 +167,6 @@ class Mobile_Minimap(pg.sprite.Sprite):
                 self.image.blit(icon_surface, (icon_x + (icon_length * col) + (icon_padding * col) + nudge, row_y))  
                 icon_rect = pg.Rect((icon_x + (icon_length * col) + (icon_padding * col) + nudge) + self.x, row_y + self.y + self.drawered_difference, icon_length, icon_length) # - 268 is the drawer difference (so it does actually have to stay as plus), guess ive forgotten to update it and it starts in the closed position lol, minor af 
                 self.icons_rects_dict[(row, col)] = icon_rect
-
-    def outline_mask(self, img, loc, thickness=3, colr=WHITE):
-        mask = pg.mask.from_surface(img)
-        mask_outline = mask.outline()
-        n = 0
-        for point in mask_outline:
-            mask_outline[n] = point[0] + loc[0], point[1] + loc[1]
-            n += 1
-        pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
 
     def draw_time(self):
         temp_time_text = f"9:00am" if self.current_state == "minimap" else f"11:00pm" # ¯\_(ツ)_/¯ + FONT_SILK_REGULAR_16 = lawd
