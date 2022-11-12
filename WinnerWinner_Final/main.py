@@ -12,7 +12,6 @@ from gui import Mobile_Minimap
 from menus import Inventory_Menu, Lootable_Menu, Achievement
 
 
-
 class Game:
     def __init__(self):
         pg.mixer.pre_init(44100, -16, 4, 2048)
@@ -21,6 +20,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.load_data()
+        self.current_level = 1
 
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -137,8 +137,75 @@ class Game:
         # -- workbench concept test --        
         self.workbench_img = pg.image.load(path.join(img_folder, WORKBENCH_IMG)).convert_alpha()
         self.workbench_img = pg.transform.scale(self.workbench_img, (128, 48))
-        
-    def new(self):
+        # test - group with minimap if keeping
+        self.wrench_img = pg.image.load(path.join(img_folder, WRENCH_ICON_IMG)).convert_alpha()
+        self.wrench_img = pg.transform.scale(self.wrench_img, (24, 24))
+        self.jackpot_img = pg.image.load(path.join(img_folder, JACKPOT_ICON_IMG)).convert_alpha()
+        self.jackpot_img = pg.transform.scale(self.jackpot_img, (24, 24))
+        self.player_p_img = pg.image.load(path.join(img_folder, PLAYER_P_ICON_IMG)).convert_alpha()
+        self.player_p_img = pg.transform.scale(self.player_p_img, (24, 24))
+
+    def play_map_2(self):
+        # initialize all variables and do all the setup for a new game
+        self.all_map_lootables = {} # includes loot details for each lootable
+        self.all_sprites = pg.sprite.LayeredUpdates()
+        # -- sprite groups --
+        self.walls = pg.sprite.Group()
+        self.zombies = pg.sprite.Group()
+        self.bullets = pg.sprite.Group()
+        self.items = pg.sprite.Group()
+        self.lootables = pg.sprite.Group()
+        self.menus = pg.sprite.Group()
+        self.minimaps = pg.sprite.Group()
+        # quick test
+        self.workbenches = pg.sprite.Group()
+        # -- current level map setup -- 
+        self.map = TiledMap(path.join(self.map_folder, 'level1.tmx'))
+        self.map_img = self.map.make_map()
+        self.map.rect = self.map_img.get_rect()
+        # -- for minimap --
+        self.all_lootable_positions = [] # grab these now for the minimap so we do it once using this setup loop otherwise we would have to do it per frame
+        # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
+        for tile_object in self.map.tmxdata.objects:
+            obj_center = vec(tile_object.x + tile_object.width / 2,
+                             tile_object.y + tile_object.height / 2)
+            if tile_object.name == 'player':
+                self.player = Player(self, obj_center.x, obj_center.y)
+            if tile_object.name == 'zombie':
+                Zombie(self, obj_center.x, obj_center.y)
+            if tile_object.name == 'wall':
+                Obstacle(self, tile_object.x, tile_object.y,
+                         tile_object.width, tile_object.height)
+            if tile_object.name in ['health', 'shotgun']:
+                Item(self, obj_center, tile_object.name)
+            if tile_object.name == 'lootable_box_small': 
+                Lootable(self, obj_center.x, obj_center.y, tile_object.name)
+                self.all_lootable_positions.append((obj_center.x, obj_center.y))
+            if tile_object.name == 'workbench': 
+                Workbench(self, obj_center.x, obj_center.y)
+        # -- camera --         
+        self.camera = Camera(self.map.width, self.map.height)
+        # -- general -- 
+        self.paused = False
+        self.night = False
+        if self.game_volume > 0.0:
+            self.effects_sounds['level_start'].play()
+        # -- minimap x gui setup --
+        self.mobile_minimap = Mobile_Minimap(self)    
+        # -- for potential addition --
+        self.player_battery_level = 100 # would go for percent ig
+        # -- misc --
+        self.current_lock_time = 0 # needs to be initialised before starting
+        self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
+        self.lootable_undo = {} # stores the last thing you removed from the lootable inventory for undo # lootable_inventory_undo
+        self.last_undo_action = False # stores the last undo action (e.g. inventory->delete, lootable->inventory, etc) the player did as a string
+        self.player_threw_gold = False # for faux achievement else would move to player class, not intending on expanding this passed 1 or 2 more than this
+        self.cheevo_counter = 0 # wanna replace this for just a close button on the achievement, for now its just a faux timer
+        self.achievement_unlocks = False
+        self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
+        self.true_check_mouse_click = False
+
+    def play_level_1(self):
         # initialize all variables and do all the setup for a new game
         self.all_map_lootables = {} # includes loot details for each lootable
         self.all_sprites = pg.sprite.LayeredUpdates()
@@ -176,7 +243,6 @@ class Game:
                 self.all_lootable_positions.append((obj_center.x, obj_center.y))
             if tile_object.name == 'workbench': 
                 Workbench(self, obj_center.x, obj_center.y)
-            
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 
@@ -184,7 +250,9 @@ class Game:
         self.night = False
         if self.game_volume > 0.0:
             self.effects_sounds['level_start'].play()
-        # -- minimap x gui setup --
+        # -- gui setup - minimap x menus --
+        # self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
+        # self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)     
         self.mobile_minimap = Mobile_Minimap(self)    
         # -- for potential addition --
         self.player_battery_level = 100 # would go for percent ig
@@ -198,6 +266,8 @@ class Game:
         self.achievement_unlocks = False
         self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
         self.true_check_mouse_click = False
+        # quick test
+        self.change_level = False
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -294,7 +364,7 @@ class Game:
                         # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")   
                         if self.player.charging >= sprite.lock_diff_time:
                             if sprite.can_player_open():
-                                self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
+                                self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)      
                                 self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)     
                                 self.draw_player_inventory()       
                                 self.draw_lootable_menu()       
@@ -307,18 +377,21 @@ class Game:
                 sprite.draw_unit_name()
                 sprite.draw_unit_status()
                 sprite.draw_unit_level()
+            # -- new workbench initial test implementation --     
+            if isinstance(sprite, Workbench):
+                self.screen.blit(sprite.image, self.camera.apply(sprite))
+                did_outline = sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
+                if did_outline: 
+                    self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)   
+                    self.draw_player_inventory()
+                if self.mobile_minimap.current_state == "minimap":
+                    self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
             # -- minimap initial test implementation --                 
             if isinstance(sprite, Mobile_Minimap):
                 sprite.draw_current_page()
                 self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
                 sprite.draw_time()
                 sprite.draw_icons()
-            if isinstance(sprite, Workbench):
-                self.screen.blit(sprite.image, self.camera.apply(sprite))
-                did_outline = sprite.outline_mask(self.camera.apply_rect(sprite.rect), 5)
-                if did_outline: 
-                    self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)
-                    self.draw_player_inventory()
             else:
                 # -- draws every sprite in the `all_sprites` group
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
@@ -449,6 +522,11 @@ class Game:
                     self.lootable_undo = False
                 if event.key == pg.K_i: # 'inventory' menu   
                     self.mobile_minimap.update_mobile_position(400)
+                if event.key == pg.K_l: # change 'level' - test af
+                    print(f"{self.current_level = }")
+                    self.current_level = 2 if self.current_level == 1 else 1
+                    self.playing = False
+                    self.change_level = True 
                 if event.key == pg.K_o: # temp for changing mobile menus
                     mobile_page = self.mobile_minimap.current_state
                     # toggle o just always takes us home
@@ -534,7 +612,6 @@ class Game:
         self.screen.blit(text_surface, text_rect)
 
 
-
 # HUD functions
 def draw_player_health(surf, x, y, pct):
     if pct < 0:
@@ -558,7 +635,14 @@ def draw_player_health(surf, x, y, pct):
 g = Game()
 g.show_start_screen()
 while True:
-    g.new()
-    g.run()
-    g.show_go_screen()
+    if g.current_level == 1: 
+        g.play_level_1()
+        g.run()
+        if not g.change_level:
+            g.show_go_screen()
+    else:
+        g.play_map_2()
+        g.run()
+        if not g.change_level:
+            g.show_go_screen()
 

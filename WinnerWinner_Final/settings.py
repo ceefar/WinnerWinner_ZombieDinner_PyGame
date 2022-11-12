@@ -153,6 +153,9 @@ STORE_ITEM_IMG_CASINO = "store_item_casino_1.png"
 STORE_ITEM_IMG_HANDGUN = "store_item_handgun_1.png"
 STORE_ITEM_IMG_LOOTBOX = "store_item_lootbox_1.png"
 STORE_ITEM_IMG_WEAPON_UPGRADE = "store_item_weapon_upgrade_1.png"
+WRENCH_ICON_IMG = 'minimap_tools_icon.png' # < testing sumnt
+JACKPOT_ICON_IMG = 'minimap_jackpot_icon.png' 
+PLAYER_P_ICON_IMG = 'minimap_player_icon.png' 
 
 # General Handy Stuff
 def round_to_base(x, base=5): 

@@ -88,7 +88,10 @@
 - fixed some bugs with mouse click state issues across multiple menu types
 - basic store front layout mockup
 
-# v1.052 11/11
+# v1.052 - v1.07 11/11
 [clapping]
 - feel like ive had huge learning breakthroughs, particularly in oop, over the last two days
-- added maps and home icons and polished the mobile menu functionality a tad 
+- added maps and home icons and polished the mobile menu functionality a tad
+- basic test af implementation of changing zone at map edge, tho implemented on button press while testing 
+    - when doing this properly obvs need to have the player stats persisting so will need to refactor to pass the player between levels (which is fine)
+- improved the minimap display to gta style icons
