@@ -376,7 +376,7 @@ class Game:
                 sprite.draw_unit_health()   
                 sprite.draw_unit_name()
                 sprite.draw_unit_status()
-                sprite.draw_unit_level()
+                sprite.draw_unit_level()  
             # -- new workbench initial test implementation --     
             if isinstance(sprite, Workbench):
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
@@ -391,7 +391,7 @@ class Game:
                 sprite.draw_current_page()
                 self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
                 sprite.draw_time()
-                sprite.draw_icons()
+                sprite.draw_icons()                    
             else:
                 # -- draws every sprite in the `all_sprites` group
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
