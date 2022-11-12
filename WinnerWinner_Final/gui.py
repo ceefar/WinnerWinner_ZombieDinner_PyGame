@@ -15,15 +15,13 @@ class Mobile_Minimap(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         # image + rect
-        self.og_image = self.game.mobile_img.copy()
-        self.image = pg.Surface((500, 500))# self.game.mobile_img
+        self.map_padding = 20
+        self.image = pg.Surface((WIDTH - (self.map_padding * 2), HEIGHT - (self.map_padding * 2))).convert_alpha() # self.game.mobile_img
         self.rect = self.image.get_rect()
-        # positioning
-        x_offset = 30
-        y_offset = 100
+        #
         self.width, self.height = self.rect.width, self.image.get_height() - 30
-        self.x = WIDTH - self.width - x_offset
-        self.y = HEIGHT - y_offset
+        self.x = 0 # WIDTH - self.width - x_offset
+        self.y = 0 # HEIGHT - y_offset
         self.pos = vec(self.x, self.y)
         self.rect.center = self.pos 
         self.shelved_y_pos = self.pos.y # storing this on init as self vars so we have it
