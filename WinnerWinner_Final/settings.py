@@ -132,15 +132,18 @@ MOB_HEALTH_BAR_LENGTH, MOB_HEALTH_BAR_HEIGHT = 100, 16
 HP_BAR_HP_SEGMENT = 50 # for strips between bars, serves to indicate a block/chunk of hp and ** not ** relative to the bar length
 
 # Lootables
-LOOT_BOX_1_IMG = 'lootable_box_1.png'
-LOOT_BOX_2_IMG = 'lootable_box_2.png'
-LOOT_BOX_3_IMG = 'lootable_box_3.png'
-LOOT_BOX_4_IMG = 'lootable_box_4.png'
-LOOT_BOX_5_IMG = 'lootable_box_5.png'
-LOOT_BOX_6_IMG = 'lootable_box_6.png'
+LOOT_BOX_1_IMG = "lootable_box_1.png"
+LOOT_BOX_2_IMG = "lootable_box_2.png"
+LOOT_BOX_3_IMG = "lootable_box_3.png"
+LOOT_BOX_4_IMG = "lootable_box_4.png"
+LOOT_BOX_5_IMG = "lootable_box_5.png"
+LOOT_BOX_6_IMG = "lootable_box_6.png"
 
-# New Concept Testing - Workbench
-WORKBENCH_IMG = 'workbench_concept_3.png' # workbench_concept_1
+# New Concept Test - Workbench
+WORKBENCH_IMG = "workbench_concept_3.png" # workbench_concept_1
+
+# New Concept Test - Delivery Locker
+LOCKER_TEST_IMG = "locker_test_img.png" # locker2 locker1
 
 # UI - Mobile Minimap
 MOBILE_IMG = "mobile_1.png" # nokia_1

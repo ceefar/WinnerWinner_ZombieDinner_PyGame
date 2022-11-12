@@ -102,3 +102,6 @@
 - delivery locker initial test implementation
 - refactoring Lootable class structure into Menuable parent child class based structure
     - with first child being the delivery locker (rest will be lootable and workbench)
+- delivery locker menu first implementation added, still much clean very wow
+- added lockers to the (soon to be updated) minimap, no unique icon yet tho just using the workbench one for now 
+- added locker temp image

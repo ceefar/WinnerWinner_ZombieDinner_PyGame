@@ -9,7 +9,7 @@ from tilemap import *
 from lootable import Lootable, Workbench, Delivery_Locker
 from player import Player
 from gui import Mobile_Minimap
-from menus import Inventory_Menu, Lootable_Menu, Achievement
+from menus import Inventory_Menu, Lootable_Menu, Delivery_Locker_Menu, Achievement
 
 class Game:
     def __init__(self):
@@ -133,9 +133,11 @@ class Game:
         self.store_item_casino_img = pg.transform.scale(self.store_item_casino_img, (56, 56))
         self.store_item_weapon_upgrade_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_WEAPON_UPGRADE)).convert_alpha()
         self.store_item_weapon_upgrade_img = pg.transform.scale(self.store_item_weapon_upgrade_img, (56, 56))
-        # -- workbench concept test --        
+        # -- workbench & locker concept test --        
         self.workbench_img = pg.image.load(path.join(img_folder, WORKBENCH_IMG)).convert_alpha()
         self.workbench_img = pg.transform.scale(self.workbench_img, (128, 48))
+        self.locker_1_img = pg.image.load(path.join(img_folder, LOCKER_TEST_IMG)).convert_alpha()
+        self.locker_1_img = pg.transform.scale(self.locker_1_img, (300, 170))
         # test - group with minimap if keeping
         self.wrench_img = pg.image.load(path.join(img_folder, WRENCH_ICON_IMG)).convert_alpha()
         self.wrench_img = pg.transform.scale(self.wrench_img, (24, 24))
@@ -194,9 +196,10 @@ class Game:
         if self.game_volume > 0.0:
             self.effects_sounds['level_start'].play()
         # -- gui setup - minimap x menus --
+        self.mobile_minimap = Mobile_Minimap(self) # now starting to move menus here so theyre initialised once at runtime and just drawn when valid
+        self.delivery_locker_menu = Delivery_Locker_Menu(self) 
         # self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
         # self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)     
-        self.mobile_minimap = Mobile_Minimap(self)    
         # -- for potential addition --
         self.player_battery_level = 100 # would go for percent ig
         # -- misc --
@@ -310,7 +313,6 @@ class Game:
                         self.current_lock_time = sprite.lock_diff_time # make this a game variable so the player can access it outside of looping all instances 
                         charge_percent = (self.player.charging / sprite.lock_diff_time) * 100 # watch for possible zero div error here tho is an easy fix tbf
                         sprite.blit_chargebar(charge_percent)
-                        # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")   
                         if self.player.charging >= sprite.lock_diff_time:
                             if sprite.can_player_open():
                                 self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)      
@@ -322,6 +324,10 @@ class Game:
             # -- New Delivery Locker initial test implementation --     
             if isinstance(sprite, Delivery_Locker):
                 sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
+                self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                player_distance = (sprite.pos - self.player.pos).length()
+                if player_distance < 120:
+                    self.delivery_locker_menu.draw(sprite)
             # -- Mobile Minimap initial test implementation --                 
             if isinstance(sprite, Mobile_Minimap):
                 sprite.draw_current_page()

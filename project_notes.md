@@ -1,5 +1,10 @@
 ** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
 
+        
+# rn
+# have press buy it now on mobile send a drone here that then just auto unlocks the box and user can add what was there too their inventory
+# if u can get this done cleanly and quickly rnrn its so much bosh
+
 
 [saturday-flow]
 - lockers with the requirement to go thru phone and use a code to unlock

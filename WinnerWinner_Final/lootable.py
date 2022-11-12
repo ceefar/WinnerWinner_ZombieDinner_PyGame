@@ -46,24 +46,6 @@ class Menuable(pg.sprite.Sprite): # New! - test implementation of parent class f
             return False  
 
 
-# - have any bs menu show up when near it
-# - like for now just a box that says unopened or empty... maybe for proper it just shows all the lockers in rect, or whatever tho tbf idc
-# - add functionality that links it to mobile, you have to go to a mobile page and enter your code
-#   - it has copy code like on android keyboard? (maybe later lol, *not* rn pls)
-# - once you press enter it will then add the brought item to this empty x unopened menu
-#   - yh defo just like a little safe img thats locked and then pops open or whatever and u click ur item to add it
-
-# - imo do these but defo new branches
-#   - then imo quickly hop to draw on floor + zones with persitence
-#   - then imo quickly try new map menu idea
-
-# - then have some super basic crafting sumnt ?!
-
-# - then probs should just quickly refactor Workbench to make it a Menuable
-#   - especially before adding any additional complexities to either ffs!
-
-# - also need to start amazon store asap then btw
-# - no need to be fancy just make it quick, but defo have add to cart and little cart bottom sticky bar 
 
 
 class Delivery_Locker(Menuable):
@@ -71,8 +53,11 @@ class Delivery_Locker(Menuable):
         super().__init__(game, x, y, orientation)
         self.groups = game.menuables, game.walls, game.delivery_lockers # confirm if we want/need all of these here btw
         pg.sprite.Sprite.__init__(self, self.groups)
-        
 
+        
+# rn
+# have press buy it now on mobile send a drone here that then just auto unlocks the box and user can add what was there too their inventory
+# if u can get this done cleanly and quickly rnrn its so much bosh
 
 
 

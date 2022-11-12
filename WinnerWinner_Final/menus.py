@@ -1,9 +1,28 @@
 from settings import *
 
 
-class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class just havent got round to it yet... also should rename to just inventory menu, and also should be snake_case, oh the shame XD
-    def __init__(self, game, inventory_info:dict): # new default param on the_lootable allows us to blit this without having to have a lootable box near by (tho need to update appropriate mouse click functions if this is opened by pressing key i for inventory)
-        self._layer = MENU_LAYER # ITEMS_LAYER 
+class Delivery_Locker_Menu(pg.sprite.Sprite): # should really be Delivery_Locker_Locker_Menu but XD
+    def __init__(self, game): 
+        self._layer = MENU_LAYER
+        self.groups = game.menus 
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game, self.player = game, game.player
+        # -- image, position, & rect setup --
+        self.width, self.height = 300, 200
+        self.image = game.locker_1_img
+        self.rect = self.image.get_rect()
+    
+    def draw(self, the_locker):
+        x_offset, y_offset = -350, -260
+        self.pos = vec(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset)
+        self.destination_pos_rect = pg.Rect(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset, self.width, self.height)
+        self.game.screen.blit(self.image, self.game.camera.apply_rect(self.destination_pos_rect))
+
+
+# -- Inventory Menu parent implementation however added this after creating the class so will create a Player_Inventory child class shortly also and have a true Inventory_Menu class -- 
+class Inventory_Menu(pg.sprite.Sprite): 
+    def __init__(self, game, inventory_info:dict):
+        self._layer = MENU_LAYER 
         self.groups = game.menus 
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game, self.player = game, game.player
