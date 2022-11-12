@@ -113,7 +113,10 @@ class Mobile_Minimap(pg.sprite.Sprite):
                 if self.game.true_check_mouse_click:
                     print(f"\nShow Confirmation, Send Notification For Location, Deduct Cost, Send Drone")
                     print(f"Send Drone")    
-                    self.game.true_check_mouse_click = False
+                    self.game.drone.go_to_target(self.game.delivery_locker_pos)
+                    print(f"{self.game.drone.pos = }")
+                    # yh so legit create your new drone like the zombie in a new class and lets bosh this out quickly
+                    # self.game.true_check_mouse_click = False
             # item images
             item_image_surf = pg.Surface((56, 56)).convert_alpha()
             item_image_surf.fill(BLUEMIDNIGHT)

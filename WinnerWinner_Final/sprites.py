@@ -106,6 +106,3 @@ class Item(pg.sprite.Sprite):
         if self.step > BOB_RANGE:
             self.step = 0
             self.dir *= -1
-
-
-
