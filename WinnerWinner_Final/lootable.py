@@ -19,9 +19,9 @@ class Menuable(pg.sprite.Sprite): # New! - test implementation of parent class f
         if isinstance(self, Delivery_Locker):
             if orientation == "x":
                 self.image = pg.Surface((128, 48))
+                self.image.fill(TAN)
             else:            
-                self.image = pg.Surface((48, 128))
-            self.image.fill(TAN)
+                self.image = self.game.delivery_locker_closed_img            
         # -- rect setup stuff --        
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)

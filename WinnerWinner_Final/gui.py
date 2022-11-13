@@ -78,6 +78,7 @@ class Mobile_Minimap(pg.sprite.Sprite):
         store_wallet_title = self.game.FONT_SILK_REGULAR_12.render(f"Your Balance", True, GREEN) # if gold >= ..., allow negative balance up to X? (process refund lol)
         store_wallet_balance = self.game.FONT_SILK_REGULAR_14.render(f"${self.game.temp_player_wallet:.2f}", True, GREEN) # if gold >= ..., allow negative balance up to X? (process refund lol)
         store_item = self.game.FONT_SILK_REGULAR_22.render(f"Weapon Item", True, WHITE)
+        store_other_item = self.game.FONT_SILK_REGULAR_22.render(f"Casino Item", True, WHITE)
         store_item_price = self.game.FONT_SILK_REGULAR_16.render(f"$195.00", True, GREEN)
         # -- title --
         self.image.blit(store_title, (60, self.home_btn_pos[1] - 5)) # 90
@@ -88,6 +89,8 @@ class Mobile_Minimap(pg.sprite.Sprite):
         # -- items --
         # yes i want a bg rect... ok well probably idk yet lol
         for i in range(0,5):
+            if i == 1:
+                store_item = store_other_item
             increment_y = 110
             item_start_x, item_start_y = 80, 135
             group_x_nudge, group_y_nudge = 20, 0 # once they are where you want them as a group use these vars to move them together
@@ -112,15 +115,22 @@ class Mobile_Minimap(pg.sprite.Sprite):
                 pg.draw.rect(self.image, YELLOW, buy_now_test_button_rect, 4, 4) 
                 if self.game.true_check_mouse_click:
                     print(f"\nShow Confirmation, Send Notification For Location, Deduct Cost, Send Drone")
-                    print(f"Send Drone")    
-                    self.game.drone.go_to_target(self.game.delivery_locker_pos)
-                    print(f"{self.game.drone.pos = }")
+                    print(f"Send Drone")  
+                    if len(self.game.drone.my_cargo) < 1:
+                        if i == 1:
+                            self.game.drone.my_cargo.append({'loot_id': 69, 'loot_type': 'health', 'loot_rect': False, 'loot_rarity': 3, 'loot_value': 'to do', 'loot_name': 'gamble', 'is_stackable': False})
+                        else:                        
+                            self.game.drone.my_cargo.append({'loot_id': 420, 'loot_type': 'health', 'loot_rect': False, 'loot_rarity': 2, 'loot_value': 'to do', 'loot_name': 'gun', 'is_stackable': False})
+                    self.game.start_delivery = True   
                     # yh so legit create your new drone like the zombie in a new class and lets bosh this out quickly
                     # self.game.true_check_mouse_click = False
             # item images
             item_image_surf = pg.Surface((56, 56)).convert_alpha()
             item_image_surf.fill(BLUEMIDNIGHT)
-            item_image_surf.blit(self.game.store_item_weapon_upgrade_img, (0,0))
+            if i == 1:
+                item_image_surf.blit(self.game.store_item_casino_img, (0,0))
+            else:
+                item_image_surf.blit(self.game.store_item_weapon_upgrade_img, (0,0))
             self.image.blit(item_image_surf, pg.Rect(store_item_title_pos_x - 70, store_item_title_pos_y, 56, 56))
 
     def draw_store_page(self):

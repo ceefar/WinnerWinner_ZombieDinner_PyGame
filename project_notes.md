@@ -1,6 +1,47 @@
 ** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
 
+
+
+# showing diff img? (maybe rn just highlight it based on its rarity)
+# - yup rarity based highlight next really quick, dw is easy af we got the dict already bosh
+# of 2 possible locations
+# then straight to turret!
+#   - new branch! (who dis?)
+
+
+# losing the gold it cost and notification (actually not this rn tho i would love to, can defo do this later for chill times tho)
+# do need to reset the drone, should be simple so not guna do now wanna move on for today
+
+# note
+# - is working click to add specific item but is an issue with the scroll if its just added first like that to inventory (it thinks the len/size for the display is still the initial amount of items)
+# - also just generally need to do this obvs as skipping over it, like making sure you can collect mulitple times or owt
+# - making sure you can send multiple tings, maybe having a different image for more items, maybe adding a funny random discount card for next order (not functionality tho)
+
+
+# for rnrn
+# - drone
+#   - actually happening on buy now
+#       - notification for packaging and delivering (tho just delivering will be fine for now tbf)
+#   - having to open via phone, ideally a code but for now just have 1 button or tap notification even oooo bosh
+#   - actually sending 1 of 2 items
+#   - actually collecting that item and having it stored in player inventory
+#   - having the drone return would be nice but is 100% not needed rn
+# then
+# - turret
+#   - red green placement thing first if can get a system like that working perf first and foremost its ggez
+# - new map
+# - zones
+
+# note
+# - should probably have a string flag tagged to things that have altered images states
+# - e.g. image_state = "open", "closed", "landing", etc
+
 # so
+# quickly add this new locker view tho
+# and i think getting it to put the item in the players inventory
+# and taking the cash
+# and having it all work on button push
+# maybe do / start add to cart too lol
 # do turret now too
 # whole red green if can cant place
 # maybe keyboard keys to rotate too

@@ -117,6 +117,7 @@ class Drone(pg.sprite.Sprite):
         self.groups = game.all_sprites # game.drones
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
+        self.start_pos = vec(x, y) # < delete ?!
         # -- object shapes and images --
         # self.image = pg.Surface((30, 30))
         # self.image.fill(MAGENTA)
@@ -137,9 +138,24 @@ class Drone(pg.sprite.Sprite):
         self.rot = self.target_dist.angle_to(vec(1, 0))
         self.arrival_time = False
         self.delivered = False
+        self.my_cargo = []
+        
+    def update(self):
+        timed_print = pg.time.get_ticks()
+        if timed_print % 10_000 < 50:
+            print(f"{self.game.start_delivery = }, {self.delivered = }")
+        if self.game.start_delivery:
+            self.go_to_target()
+            if timed_print % 1_000 < 50:
+                print(f"{self.my_cargo[0]['loot_name'] = }")
+        else:
+            pass
 
     # dont wanna run this all the time by, take it out of all sprites? 
-    def update(self): 
+    def go_to_target(self): 
+        timed_print = pg.time.get_ticks()
+        if timed_print % 2000 < 50:
+            print(f"GO TO TARGET > {self.target_dist.length()}")
         if not self.delivered and not self.game.took_locker_loot: # if you've not delivered it and the user hasnt clicked it > then for take off you'll need another time which you should trigger when the player clicks to take the locker loot...
             if self.target_dist.length() > 85:
                 if self.target_dist.length() < 1200:
@@ -165,6 +181,11 @@ class Drone(pg.sprite.Sprite):
                         self.image = pg.transform.scale(self.game.drone_img.copy(), (self.image.get_width() - 0.1, self.image.get_height() - 0.1))
                         if self.image.get_width() <= 66:
                             self.delivered = True
-        # keep setting the rect center regardless
+                            self.game.start_delivery = False
+                            # need to reset the drone here ig btw 
+        elif self.delivered and not self.game.took_locker_loot: # its landed and delivered and now just waiting for the player to collect it, and ig then return take off tho is super unnecessary
+            pass
+            # self.game.start_delivery = False # reset this once the drone has completed its delivery
+        # keep setting the rect center regardless of the outcome in the above switch case
         self.rect.center = vec(self.pos.x - (self.image.get_width() / 2), self.pos.y - (self.image.get_height() / 2))
             

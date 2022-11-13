@@ -107,3 +107,15 @@
 - added locker temp image
 - hover state and clicked trigger flag for buy now button in mobile store
 - drone lawd
+
+
+sunday title stuff
+- updated locker image to have open or closed top depending on loading
+- small rework of how images are loading based on states for lockers n drone
+- drone now going "inside" the locker
+- can now tap and "collect" the item, tho not actually done the inventory or true item yet
+- update onclick functionality, need to overhaul this now i understand its limitations better
+- onclick buy now drone now working
+- sending specific item brought from the mobile store <3
+- collecting item to inventory <3
+- delivery item box highlighting based on rarity (well menu is but box soon)

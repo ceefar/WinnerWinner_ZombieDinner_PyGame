@@ -146,6 +146,8 @@ WORKBENCH_IMG = "workbench_concept_3.png" # workbench_concept_1
 LOCKER_TEST_IMG = "locker_test_img.png" # locker2 locker1
 LOCKER_TEST_OPEN_IMG = "locker_test_img_open.png" # locker2 locker1
 LOCKER_TEST_EMPTY_IMG = "locker_test_img_empty.png" # locker2 locker1
+DELIVERY_LOCKER_CLOSED_TOP_IMG = "locker_top_test_img1.png"
+DELIVERY_LOCKER_OPEN_TOP_IMG = "locker_top_test_img2.png"
 
 # New Concept Test - Drone / Delivery Drone
 DRONE_IMG = "drone.png"

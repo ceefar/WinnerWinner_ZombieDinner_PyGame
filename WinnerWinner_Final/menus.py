@@ -17,17 +17,38 @@ class Delivery_Locker_Menu(pg.sprite.Sprite): # should really be Delivery_Locker
         x_offset, y_offset = -350, -260
         self.pos = vec(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset)
         self.destination_pos_rect = pg.Rect(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset, self.width, self.height)
-        true_rect = self.game.screen.blit(self.image, self.game.camera.apply_rect(self.destination_pos_rect))
-        self.update_image(true_rect)
-
+        self.true_rect = self.game.screen.blit(self.image, self.game.camera.apply_rect(self.destination_pos_rect))
+        self.update_image(self.true_rect)
+        
     def update_image(self, true_rect):
-        if true_rect.collidepoint(pg.mouse.get_pos()):
-            self.game.took_locker_loot = True
+        if self.game.drone.delivered and not self.game.took_locker_loot:
+            # print(f"{self.get_rarity_colour(self.game.drone.my_cargo[0]['loot_rarity'])}") # just realised the image isnt seperate so the outline will just be the whole menu lol, is fine for now
+            self.outline_mask(self.image, self.true_rect, 5, self.get_rarity_colour(self.game.drone.my_cargo[0]['loot_rarity']))
+            if true_rect.collidepoint(pg.mouse.get_pos()):
+                if self.game.player_mouse_down:
+                    self.game.took_locker_loot = True
+                    print(f"Player Took Loot")
+                    self.game.player_mouse_down = not self.game.player_mouse_down
+                    self.game.player.player_inventory[self.game.drone.my_cargo[0]['loot_id']] = self.game.drone.my_cargo[0]
+                    print(f"{self.game.player_mouse_down =}")               
         if self.game.drone.delivered and self.game.took_locker_loot:
             self.image = self.game.locker_1_empty_img
         elif self.game.drone.delivered:
             self.image = self.game.locker_1_open_img
-            
+
+    def get_rarity_colour(self, rarity_int):# yes, will do this properly shortly
+        rarities = {1:{"diff_buffer":400, "colour":TAN},2:{"diff_buffer":320, "colour":SKYBLUE},3:{"diff_buffer":25, "colour":LIME},4:{"diff_buffer":20, "colour":PURPLE},5:{"diff_buffer":15, "colour":BLUEGREEN},6:{"diff_buffer":10, "colour":YELLOW},7:{"diff_buffer":5, "colour":MAGENTA},8:{"diff_buffer":0, "colour":CYAN}}
+        return rarities[rarity_int]["colour"]               
+        
+    def outline_mask(self, img, loc, thickness=3, colr=WHITE):
+        mask = pg.mask.from_surface(img)
+        mask_outline = mask.outline()
+        n = 0
+        for point in mask_outline:
+            mask_outline[n] = point[0] + loc[0], point[1] + loc[1]
+            n += 1
+        pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
+
 
 # -- Inventory Menu parent implementation however added this after creating the class so will create a Player_Inventory child class shortly also and have a true Inventory_Menu class -- 
 class Inventory_Menu(pg.sprite.Sprite): 

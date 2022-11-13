@@ -133,10 +133,12 @@ class Game:
         self.store_item_casino_img = pg.transform.scale(self.store_item_casino_img, (56, 56))
         self.store_item_weapon_upgrade_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_WEAPON_UPGRADE)).convert_alpha()
         self.store_item_weapon_upgrade_img = pg.transform.scale(self.store_item_weapon_upgrade_img, (56, 56))
-        # -- workbench & locker concept test --        
+        # -- workbench & delivery locker, and locker menu test concept images --        
         self.workbench_img = pg.image.load(path.join(img_folder, WORKBENCH_IMG)).convert_alpha()
         self.workbench_img = pg.transform.scale(self.workbench_img, (128, 48))
-        self.locker_1_img = pg.image.load(path.join(img_folder, LOCKER_TEST_IMG)).convert_alpha()
+        self.delivery_locker_closed_img = pg.image.load(path.join(img_folder, DELIVERY_LOCKER_CLOSED_TOP_IMG)).convert_alpha() # the in world locker obstacle x object
+        self.delivery_locker_open_img = pg.image.load(path.join(img_folder, DELIVERY_LOCKER_OPEN_TOP_IMG)).convert_alpha()
+        self.locker_1_img = pg.image.load(path.join(img_folder, LOCKER_TEST_IMG)).convert_alpha() # the locker menu
         self.locker_1_img = pg.transform.scale(self.locker_1_img, (300, 170))
         self.locker_1_open_img = pg.image.load(path.join(img_folder, LOCKER_TEST_OPEN_IMG)).convert_alpha()
         self.locker_1_open_img = pg.transform.scale(self.locker_1_open_img, (300, 170))
@@ -225,6 +227,8 @@ class Game:
         # quick test
         self.change_level = False
         self.took_locker_loot = False
+        self.player_mouse_down = False
+        self.start_delivery = False
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -342,6 +346,12 @@ class Game:
                 if player_distance < 120:
                     sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
                     self.delivery_locker_menu.draw(sprite)
+                # the drone has arrived use the image that shows the top open
+                if self.drone.target_dist.length() < 85: 
+                    sprite.image = self.delivery_locker_open_img
+                # if delivered use the og img with the shut top, obvs will just animate this, obvs will make a function to handle images properly in the class itself
+                if self.drone.delivered:
+                    sprite.image = self.delivery_locker_closed_img
             # -- Mobile Minimap initial test implementation --                 
             if isinstance(sprite, Mobile_Minimap):
                 sprite.draw_current_page()
@@ -362,8 +372,14 @@ class Game:
                 if self.mobile_minimap.current_state == "minimap":
                     self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
             else: # this if else is specific to Workbench? (as it has the blit done at the start)
-                # -- draws every sprite in the `all_sprites` group (except Workbench)
-                self.screen.blit(sprite.image, self.camera.apply(sprite))
+                # -- draws every sprite in the `all_sprites` group --
+                # except Workbench, and else -> guna just hard code what not to include now and refactor/clean up this section a bit shortly
+                if not isinstance(sprite, Workbench) and not isinstance(sprite, Drone):
+                    self.screen.blit(sprite.image, self.camera.apply(sprite))
+                elif isinstance(sprite, Drone):
+                    if not sprite.delivered: # when its "delivered" we wont draw it so it looks like its inside the box - just kinda simple temp way to do it for now anyways
+                        self.screen.blit(sprite.image, self.camera.apply(sprite))
+
             # -- draw dev mode / debug mode rects, hit boxes, and info --
             if self.draw_debug:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1) # draw the objects hit rect
@@ -420,7 +436,10 @@ class Game:
     def events(self):
         # handle events here
         for event in pg.event.get():
-            # -- mouse events --           
+            # -- mouse events --       
+            self.player_mouse_down = False # ensure its reset initially every frame
+            if event.type == pg.MOUSEBUTTONDOWN:
+                self.player_mouse_down = True  
             if event.type == pg.MOUSEBUTTONUP: # <- own function duh
                 self.true_check_mouse_click = True
                 clicked_home_icon = self.mobile_minimap.check_click_home_buttons() # ik
