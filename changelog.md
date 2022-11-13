@@ -106,3 +106,4 @@
 - added lockers to the (soon to be updated) minimap, no unique icon yet tho just using the workbench one for now 
 - added locker temp image
 - hover state and clicked trigger flag for buy now button in mobile store
+- drone lawd

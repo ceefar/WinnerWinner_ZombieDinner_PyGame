@@ -1,16 +1,42 @@
 ** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
 
-        
-# rn
-# aite we doing drones again yolo
-# do zones
-# do proper map
-# do ordering with add to cart
+# so
+# do turret now too
+# whole red green if can cant place
+# maybe keyboard keys to rotate too
+# consider mechanic like needs a solar generator
+# must be in range of x tiles and then has x slots i.e 4
+# 1 must be panel and the other 3 plugged in slots if not panels will use power
+# this is a bit much tho i say just turrets for now is fine
+# say that have ammo like the player and you can give it to them bosh
 
+# then the remaining stuff thats new to confirm which is basically just zones, new map/minimap, and companion ig
+# try to get that on smash as much as you can over sunday
+# really tho after that stuff
+
+# you just wanna just put this in a stable state
+# have good notes
+# then clean it up, make it a new branch, and push it to main
+
+# then do a short vid (atleast for showcase even if not rn - actually plus is how i want the screenshots anyway but get a hd screencap thing ffs)
+# and the screenshots
+# and do the repo (yes get a hd old pathing thing quickly too, and my own lego design tings too)
+
+# also want to quickly mock up that other game idea just for like an hour or 2 for fun
+
+# then from monday take a week on a new project and job stuff mostly just to step away from this for a bit and then come back to it
+        
 
 [saturday-flow]
-- lockers with the requirement to go thru phone and use a code to unlock
-- refactor Workbench to make it a child of Menuable
+- to finish drone 
+    - get it dropping off the item you brought into that menu and get it so you can click the thing and add it to ur inventory
+        - see phone for remaining
+- omg add turret! and other systemic things
+- see phone for remaining
+
+[omd]
+- do turret lol
+- its nice to have more than one way to deal with zombies duh else is just boring
 
 [today]
 - first
@@ -21,7 +47,12 @@
 - zones and minimap new concept
 - and then
 - get the drone on that too moving and showing up as a waypoint on where it will be going to
+- do also want to quickly get its rotor animating but skip dat rn
 - then <3
+- but also
+- else for lockers? 
+- refactor Workbench to make it a child of Menuable
+
 
 [quick-notes]
  - have amazon prime drones deliver ur product to random drop zone lockers (it glitches out)

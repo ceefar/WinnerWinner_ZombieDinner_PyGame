@@ -13,11 +13,22 @@ class Delivery_Locker_Menu(pg.sprite.Sprite): # should really be Delivery_Locker
         self.rect = self.image.get_rect()
     
     def draw(self, the_locker):
+        self.the_locker = the_locker
         x_offset, y_offset = -350, -260
         self.pos = vec(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset)
         self.destination_pos_rect = pg.Rect(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset, self.width, self.height)
-        self.game.screen.blit(self.image, self.game.camera.apply_rect(self.destination_pos_rect))
+        true_rect = self.game.screen.blit(self.image, self.game.camera.apply_rect(self.destination_pos_rect))
+        self.update_image(true_rect)
 
+    def update_image(self, true_rect):
+        if true_rect.collidepoint(pg.mouse.get_pos()):
+            print(f"Mouse!")
+            self.game.took_locker_loot = True
+        if self.game.drone.delivered and self.game.took_locker_loot:
+            self.image = self.game.locker_1_empty_img
+        elif self.game.drone.delivered:
+            self.image = self.game.locker_1_open_img
+            
 
 # -- Inventory Menu parent implementation however added this after creating the class so will create a Player_Inventory child class shortly also and have a true Inventory_Menu class -- 
 class Inventory_Menu(pg.sprite.Sprite): 

@@ -108,8 +108,9 @@ class Item(pg.sprite.Sprite):
             self.dir *= -1
 
 
+# basically just have to sort this so its now just running when the button press happens, so probably just rename from update and then have a bool flag to toggle on then stays on until completed (both back and forth, bosh), simple flag like delivery_in_progress or sumnt
 
-# -- quick test for drone --
+# -- quick first test implementation for Delivery Drone... should really rename to Delivery Drone too lol --
 class Drone(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self._layer = ITEMS_LAYER
@@ -117,9 +118,11 @@ class Drone(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         # -- object shapes and images --
-        self.image = pg.Surface((30, 30))
-        self.image.fill(MAGENTA)
-        self.rect = self.image.get_rect()
+        # self.image = pg.Surface((30, 30))
+        # self.image.fill(MAGENTA)
+        self.image = game.drone_img
+        self.rect = self.image.get_rect()    
+        self.size = self.rect.width
         self.rect.center = (x, y)
         self.hit_rect = self.rect.copy()
         self.hit_rect.center = self.rect.center
@@ -128,22 +131,40 @@ class Drone(pg.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.rect.center = self.pos
-        self.speed = 300
+        self.speed = 600
         self.target = game.locker_location
         self.target_dist = self.target.pos - self.pos
         self.rot = self.target_dist.angle_to(vec(1, 0))
+        self.arrival_time = False
+        self.delivered = False
 
-    def update(self):
-        if self.target_dist.length() > 1:
-            self.rect.center = self.pos
-            self.acc = vec(1, 0).rotate(-self.rot)
-            self.acc.scale_to_length(self.speed)
-            self.acc += self.vel * -1
-            self.vel += self.acc * self.game.dt
-            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-            self.hit_rect.centerx = self.pos.x # < probably not needed so delete both ?        
-            self.hit_rect.centery = self.pos.y
-            self.rect.center = self.hit_rect.center
-            self.target_dist = self.target.pos - self.pos
-            print(f"{self.target_dist.length():.0f}, {self.pos = }, {self.target.pos = }")
-        
+    # dont wanna run this all the time by, take it out of all sprites? 
+    def update(self): 
+        if not self.delivered and not self.game.took_locker_loot: # if you've not delivered it and the user hasnt clicked it > then for take off you'll need another time which you should trigger when the player clicks to take the locker loot...
+            if self.target_dist.length() > 85:
+                if self.target_dist.length() < 1200:
+                    if self.speed > 100:
+                        self.speed -= int(self.speed / 50) # 1 percent
+                        self.arrival_time = pg.time.get_ticks()
+                self.rect.center = self.pos
+                self.acc = vec(1, 0).rotate(-self.rot)
+                self.acc.scale_to_length(self.speed)
+                self.acc += self.vel * -1
+                self.vel += self.acc * self.game.dt
+                self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+                self.hit_rect.centerx = self.pos.x # < probably not needed so delete both ?        
+                self.hit_rect.centery = self.pos.y
+                self.rect.center = self.hit_rect.center
+                self.target_dist = self.target.pos - self.pos
+                # print(f"{self.target_dist.length():.0f}, {self.speed = } {self.pos = }, {self.target.pos = }")
+            else:
+                # should defo be a function so can easily do the reverse too duh            
+                check_time = pg.time.get_ticks()
+                if check_time - self.arrival_time >= 3500: # short pause to simulate landing / take off
+                    if self.image.get_width() > 64:                
+                        self.image = pg.transform.scale(self.game.drone_img.copy(), (self.image.get_width() - 0.1, self.image.get_height() - 0.1))
+                        if self.image.get_width() <= 66:
+                            self.delivered = True
+        # keep setting the rect center regardless
+        self.rect.center = vec(self.pos.x - (self.image.get_width() / 2), self.pos.y - (self.image.get_height() / 2))
+            

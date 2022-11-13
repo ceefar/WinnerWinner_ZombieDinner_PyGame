@@ -21,6 +21,7 @@ class Menuable(pg.sprite.Sprite): # New! - test implementation of parent class f
                 self.image = pg.Surface((128, 48))
             else:            
                 self.image = pg.Surface((48, 128))
+            self.image.fill(TAN)
         # -- rect setup stuff --        
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -43,9 +44,7 @@ class Menuable(pg.sprite.Sprite): # New! - test implementation of parent class f
             pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
             return True # validates automatically opening menus when near the menuable - i actually like this so keep it but add C to close
         else:
-            return False  
-
-
+            return False 
 
 
 class Delivery_Locker(Menuable):
@@ -53,13 +52,11 @@ class Delivery_Locker(Menuable):
         super().__init__(game, x, y, orientation)
         self.groups = game.menuables, game.walls, game.delivery_lockers # confirm if we want/need all of these here btw
         pg.sprite.Sprite.__init__(self, self.groups)
-        # GUNA NEED AN ID ASAP!
-
+        # >> GUNA NEED AN ID!?!! <<
 
 # rn
 # have press buy it now on mobile send a drone here that then just auto unlocks the box and user can add what was there too their inventory
 # if u can get this done cleanly and quickly rnrn its so much bosh
-
 
 
 class Workbench(pg.sprite.Sprite):

@@ -138,13 +138,20 @@ class Game:
         self.workbench_img = pg.transform.scale(self.workbench_img, (128, 48))
         self.locker_1_img = pg.image.load(path.join(img_folder, LOCKER_TEST_IMG)).convert_alpha()
         self.locker_1_img = pg.transform.scale(self.locker_1_img, (300, 170))
-        # test - group with minimap if keeping
+        self.locker_1_open_img = pg.image.load(path.join(img_folder, LOCKER_TEST_OPEN_IMG)).convert_alpha()
+        self.locker_1_open_img = pg.transform.scale(self.locker_1_open_img, (300, 170))
+        self.locker_1_empty_img = pg.image.load(path.join(img_folder, LOCKER_TEST_EMPTY_IMG)).convert_alpha()
+        self.locker_1_empty_img = pg.transform.scale(self.locker_1_empty_img, (300, 170))
+        # -- test - group with minimap if keeping --
         self.wrench_img = pg.image.load(path.join(img_folder, WRENCH_ICON_IMG)).convert_alpha()
         self.wrench_img = pg.transform.scale(self.wrench_img, (24, 24))
         self.jackpot_img = pg.image.load(path.join(img_folder, JACKPOT_ICON_IMG)).convert_alpha()
         self.jackpot_img = pg.transform.scale(self.jackpot_img, (24, 24))
         self.player_p_img = pg.image.load(path.join(img_folder, PLAYER_P_ICON_IMG)).convert_alpha()
         self.player_p_img = pg.transform.scale(self.player_p_img, (24, 24))
+        # -- new drone test --
+        self.drone_img = pg.image.load(path.join(img_folder, DRONE_IMG)).convert_alpha()
+        self.drone_img = pg.transform.scale(self.drone_img, (140, 140)) # (56, 56))
 
     def play_map_1(self):
         # initialize all variables and do all the setup for a new game
@@ -190,7 +197,7 @@ class Game:
                 a_locker = Delivery_Locker(self, obj_center.x, obj_center.y, orientation="y")
                 self.locker_location = a_locker # temp af
             if tile_object.name == "drone":
-                Drone(self, obj_center.x, obj_center.y)
+                self.drone = Drone(self, obj_center.x, obj_center.y)
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 
@@ -217,6 +224,7 @@ class Game:
         self.true_check_mouse_click = False
         # quick test
         self.change_level = False
+        self.took_locker_loot = False
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -340,6 +348,10 @@ class Game:
                 self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
                 sprite.draw_time()
                 sprite.draw_icons()
+            # -- New super duper test for Drone --
+            if isinstance(sprite, Drone):
+                if self.mobile_minimap.current_state == "minimap":
+                    self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
             # -- New Workbench initial test implementation --     
             if isinstance(sprite, Workbench): 
                 self.screen.blit(sprite.image, self.camera.apply(sprite))

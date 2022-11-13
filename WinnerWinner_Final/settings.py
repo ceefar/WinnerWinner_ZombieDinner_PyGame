@@ -144,6 +144,11 @@ WORKBENCH_IMG = "workbench_concept_3.png" # workbench_concept_1
 
 # New Concept Test - Delivery Locker
 LOCKER_TEST_IMG = "locker_test_img.png" # locker2 locker1
+LOCKER_TEST_OPEN_IMG = "locker_test_img_open.png" # locker2 locker1
+LOCKER_TEST_EMPTY_IMG = "locker_test_img_empty.png" # locker2 locker1
+
+# New Concept Test - Drone / Delivery Drone
+DRONE_IMG = "drone.png"
 
 # UI - Mobile Minimap
 MOBILE_IMG = "mobile_1.png" # nokia_1
