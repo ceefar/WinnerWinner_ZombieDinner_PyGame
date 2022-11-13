@@ -22,7 +22,6 @@ class Delivery_Locker_Menu(pg.sprite.Sprite): # should really be Delivery_Locker
 
     def update_image(self, true_rect):
         if true_rect.collidepoint(pg.mouse.get_pos()):
-            print(f"Mouse!")
             self.game.took_locker_loot = True
         if self.game.drone.delivered and self.game.took_locker_loot:
             self.image = self.game.locker_1_empty_img
