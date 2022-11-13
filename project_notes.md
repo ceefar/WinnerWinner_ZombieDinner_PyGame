@@ -1,8 +1,9 @@
 ** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
 
-# try this thing with the circle rotation
-# if that shit doesnt work quick ting
-# go do either new map, zones, or even 1 of 2 new game ideas just to close out the day
+
+# go do either new map or zones
+# or final amazon n similar tings
+# or even 1 of 2 new game ideas just to close out the day
 
 # of 2 possible locations
 # - sacking for now
