@@ -1,9 +1,13 @@
 ** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
 
 
-# go do either new map or zones
+# go do either new map 
+# - kinda part done
+# - the whole point is to have it working with zones with the side by side thing
+# - guna have to remotivate myself for that one after dinner
+# - or as per below might just finish up and clean up some of the zmazon stuff
+# or zones
 # or final amazon n similar tings
-# or even 1 of 2 new game ideas just to close out the day
 
 # of 2 possible locations
 # - sacking for now
@@ -25,9 +29,6 @@
 #   - actually sending 1 of 2 items
 #   - actually collecting that item and having it stored in player inventory
 #   - having the drone return would be nice but is 100% not needed rn
-# then
-# - turret
-#   - red green placement thing first if can get a system like that working perf first and foremost its ggez
 # - new map
 # - zones
 
