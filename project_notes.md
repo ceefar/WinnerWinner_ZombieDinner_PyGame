@@ -2,8 +2,6 @@
 
 
 
-# showing diff img? (maybe rn just highlight it based on its rarity)
-# - yup rarity based highlight next really quick, dw is easy af we got the dict already bosh
 # of 2 possible locations
 # then straight to turret!
 #   - new branch! (who dis?)
