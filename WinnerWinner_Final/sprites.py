@@ -141,21 +141,17 @@ class Drone(pg.sprite.Sprite):
         self.my_cargo = []
         
     def update(self):
-        timed_print = pg.time.get_ticks()
-        if timed_print % 10_000 < 50:
-            print(f"{self.game.start_delivery = }, {self.delivered = }")
+        #  timed_print = pg.time.get_ticks() if timed_print % 1_000 < 50:
         if self.game.start_delivery:
             self.go_to_target()
-            if timed_print % 1_000 < 50:
-                print(f"{self.my_cargo[0]['loot_name'] = }")
         else:
             pass
 
     # dont wanna run this all the time by, take it out of all sprites? 
     def go_to_target(self): 
-        timed_print = pg.time.get_ticks()
-        if timed_print % 2000 < 50:
-            print(f"GO TO TARGET > {self.target_dist.length()}")
+        # timed_print = pg.time.get_ticks()
+        # if timed_print % 2000 < 50:
+        #     print(f"GO TO TARGET > {self.target_dist.length()}")
         if not self.delivered and not self.game.took_locker_loot: # if you've not delivered it and the user hasnt clicked it > then for take off you'll need another time which you should trigger when the player clicks to take the locker loot...
             if self.target_dist.length() > 85:
                 if self.target_dist.length() < 1200:
@@ -189,3 +185,33 @@ class Drone(pg.sprite.Sprite):
         # keep setting the rect center regardless of the outcome in the above switch case
         self.rect.center = vec(self.pos.x - (self.image.get_width() / 2), self.pos.y - (self.image.get_height() / 2))
             
+
+# class Turret_Maker(pg.sprite.Sprite):
+#     def __init__(self, game):
+#         self._layer = ITEMS_LAYER
+#         self.groups = game.all_sprites # game.turrets
+#         pg.sprite.Sprite.__init__(self, self.groups)
+#         self.game = game
+#         # -- object shapes and images --
+#         x, y = game.player.pos.x + 50, game.player.pos.y + 50
+#         self.image = game.drone_img
+#         # self.image = pg.Surface((32, 32))
+#         # self.image.fill(GREEN)
+#         self.rect = self.image.get_rect()    
+#         self.size = self.rect.width
+#         self.rect.center = (x, y)
+#         self.hit_rect = self.rect.copy()
+#         self.hit_rect.center = self.rect.center
+#         # -- movement --
+#         self.pos = vec(x, y)
+#         self.vel = vec(0, 0)
+#         self.acc = vec(0, 0)
+#         self.rect.center = self.pos
+#         # -- targeting x looking --
+#         self.looking_at = game.locker_location
+#         self.target_to_self = self.looking_at.pos - self.pos
+#         self.target_dist = self.target_to_self.length()
+#         self.rot = self.target_to_self.angle_to(vec(1, 0))
+
+#     def update(self):
+#         self.rect.center = self.game.player.rect.center # += self.game.player.vel * self.game.dt

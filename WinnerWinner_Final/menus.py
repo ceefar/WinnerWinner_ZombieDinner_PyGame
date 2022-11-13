@@ -30,7 +30,7 @@ class Delivery_Locker_Menu(pg.sprite.Sprite): # should really be Delivery_Locker
                     print(f"Player Took Loot")
                     self.game.player_mouse_down = not self.game.player_mouse_down
                     self.game.player.player_inventory[self.game.drone.my_cargo[0]['loot_id']] = self.game.drone.my_cargo[0]
-                    print(f"{self.game.player_mouse_down =}")               
+                    # print(f"{self.game.player_mouse_down =}")               
         if self.game.drone.delivered and self.game.took_locker_loot:
             self.image = self.game.locker_1_empty_img
         elif self.game.drone.delivered:

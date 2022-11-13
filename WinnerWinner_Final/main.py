@@ -211,7 +211,9 @@ class Game:
         self.mobile_minimap = Mobile_Minimap(self) # now starting to move menus here so theyre initialised once at runtime and just drawn when valid
         self.delivery_locker_menu = Delivery_Locker_Menu(self) 
         # self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
-        # self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)     
+        # self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)  
+        # -- new test for turret but as a maker / creator / handler initially --
+        # self.turret_maker = Turret_Maker(self)
         # -- for potential addition --
         self.player_battery_level = 100 # would go for percent ig
         # -- misc --

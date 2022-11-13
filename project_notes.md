@@ -1,11 +1,11 @@
 ** Personal Notes - stored in .md files as it breaks down well visually in vscode by default... yes i realise this probably looks insane in markdown on github **
 
-
+# try this thing with the circle rotation
+# if that shit doesnt work quick ting
+# go do either new map, zones, or even 1 of 2 new game ideas just to close out the day
 
 # of 2 possible locations
-# then straight to turret!
-#   - new branch! (who dis?)
-
+# - sacking for now
 
 # losing the gold it cost and notification (actually not this rn tho i would love to, can defo do this later for chill times tho)
 # do need to reset the drone, should be simple so not guna do now wanna move on for today
