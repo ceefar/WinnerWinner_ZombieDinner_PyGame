@@ -242,10 +242,6 @@ class Mobile_Minimap(pg.sprite.Sprite):
         wall_minimap_x_pos = (self.inner_screen_rect_width / 100) * wall_minimap_x_percent 
         wall_minimap_y_percent = (loot_pos_y / self.game.map.height) * 100
         wall_minimap_y_pos = (self.inner_screen_rect_height / 100) * wall_minimap_y_percent + self.inner_shift_y # its calculated using 1% the size of the minimap multiplied by the above percent, innershift is new extra
-        # circle for this lootable's location
-        # wall_minimap_surf = pg.Surface((12, 12))
-        # wall_minimap_surf.fill(GOOGLEMAPSBLUE)
-        # pg.draw.circle(wall_minimap_surf, PURPLE, (8,8), 4)
         wall_minimap_surf = self.game.jackpot_img
         # final blit
         self.image.blit(wall_minimap_surf, (wall_minimap_x_pos, wall_minimap_y_pos))
@@ -255,10 +251,6 @@ class Mobile_Minimap(pg.sprite.Sprite):
         wall_workbench_x_pos = (self.inner_screen_rect_width / 100) * wall_workbench_x_percent 
         wall_workbench_y_percent = (bench_pos_y / self.game.map.height) * 100
         wall_workbench_y_pos = (self.inner_screen_rect_height / 100) * wall_workbench_y_percent + self.inner_shift_y # its calculated using 1% the size of the minimap multiplied by the above percent, innershift is new extra
-        # circle for this lootable's location
-        # wall_workbench_surf = pg.Surface((20, 20))
-        # wall_workbench_surf.fill(GOOGLEMAPSBLUE)
-        # pg.draw.circle(wall_workbench_surf, ORANGE, (8,8), 4)
         wall_workbench_surf = self.game.wrench_img
         # final blit
         self.image.blit(wall_workbench_surf, (wall_workbench_x_pos, wall_workbench_y_pos))
@@ -268,3 +260,93 @@ class Mobile_Minimap(pg.sprite.Sprite):
             self.clicked_menu_id = False
             
         
+class Fullscreen_Map(pg.sprite.Sprite):
+    def __init__(self, game):
+        self._layer = EFFECTS_LAYER # MENU_LAYER 
+        self.groups = game.all_sprites, game.minimaps 
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        # image + rect
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        self.image.fill(GOOGLEMAPSBLUE)
+        self.rect = self.image.get_rect()
+        # positioning
+        self.y_offset = 150
+        self.width, self.height, = self.rect.width, self.rect.height  
+        self.x = 0
+        self.y = 0
+        self.pos = vec(self.x, self.y)
+        self.rect.center = self.pos         
+        # draw inner faux screen rect to our image on init 
+        self.inner_screen_rect_x, self.inner_screen_rect_y = 50, 50
+        self.inner_screen_rect_width, self.inner_screen_rect_height = self.width - 100, self.height - 100
+        self.inner_rect = pg.Rect(self.inner_screen_rect_x, self.inner_screen_rect_y, self.inner_screen_rect_width, self.inner_screen_rect_height)
+        self.inner_screen_rect = pg.draw.rect(self.image, TAN, self.inner_rect, 0, 20) 
+        # page / state
+        self.current_state = "closed"
+    
+    def update(self):
+        #
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        self.image.fill(GOOGLEMAPSBLUE)
+        #
+        self.inner_rect = pg.Rect(self.inner_screen_rect_x, self.inner_screen_rect_y, self.inner_screen_rect_width, self.inner_screen_rect_height)
+        self.inner_screen_rect = pg.draw.rect(self.image, TAN, self.inner_rect, 0, 20) 
+        #
+        self.draw_player()
+        #
+        for loot_x, loot_y in self.game.all_lootable_positions:
+            self.draw_lootables(loot_x, loot_y)
+        #
+        for loot_x, loot_y in self.game.map_workbench_locations:
+            self.draw_workbenches(loot_x, loot_y) 
+        #         
+        for loot_x, loot_y in self.game.map_locker_locations:
+            self.draw_deliverylockers(loot_x, loot_y)          
+        #
+        self.game.screen.blit(self.image, (0,0))
+
+    def draw_player(self):
+        # x and y but should just be seperate functions that will work for both player and zombie, its my first attempt which im actually super chuffed with tbf
+        player_minimap_x_percent = (self.game.player.pos.x / self.game.map.width) * 100
+        player_minimap_x_pos = (self.inner_screen_rect_width / 100) * player_minimap_x_percent # its calculated using 1% the size of the minimap multiplied by the above percent
+        player_minimap_y_percent = (self.game.player.pos.y / self.game.map.height) * 100
+        player_minimap_y_pos = (self.inner_screen_rect_height / 100) * player_minimap_y_percent + self.y_offset # its calculated using 1% the size of the minimap multiplied by the above percent, innershift is new extra
+        self.player_minimap_surf = self.game.player_p_img
+        # final blit
+        top_of_screen = 50 
+        player_minimap_y_pos = max(player_minimap_y_pos, top_of_screen) # cap it here so the player cant walk around the edges of the phone on the minimap
+        if player_minimap_y_pos > top_of_screen: # dont blit the player if they walk off the top, had considered a "target disconnected" but diminishing returns
+            self.image.blit(self.player_minimap_surf, (player_minimap_x_pos, player_minimap_y_pos))        
+
+    def draw_lootables(self, loot_pos_x, loot_pos_y):
+        wall_minimap_x_percent = (loot_pos_x / self.game.map.width) * 100
+        wall_minimap_x_pos = (self.inner_screen_rect_width / 100) * wall_minimap_x_percent 
+        wall_minimap_y_percent = (loot_pos_y / self.game.map.height) * 100
+        wall_minimap_y_pos = (self.inner_screen_rect_height / 100) * wall_minimap_y_percent  + self.y_offset # its calculated using 1% the size of the minimap multiplied by the above percent, innershift is new extra
+        wall_minimap_surf = self.game.jackpot_img
+        # final blit
+        self.image.blit(wall_minimap_surf, (wall_minimap_x_pos, wall_minimap_y_pos))
+
+    def draw_workbenches(self, bench_pos_x, bench_pos_y):
+        wall_workbench_x_percent = (bench_pos_x / self.game.map.width) * 100
+        wall_workbench_x_pos = (self.inner_screen_rect_width / 100) * wall_workbench_x_percent 
+        wall_workbench_y_percent = (bench_pos_y / self.game.map.height) * 100
+        wall_workbench_y_pos = (self.inner_screen_rect_height / 100) * wall_workbench_y_percent + self.y_offset # its calculated using 1% the size of the minimap multiplied by the above percent, innershift is new extra
+        wall_workbench_surf = self.game.wrench_img
+        # final blit
+        self.image.blit(wall_workbench_surf, (wall_workbench_x_pos, wall_workbench_y_pos))
+
+    def draw_deliverylockers(self, locker_pos_x, locker_pos_y):
+        deliverylocker_x_percent = (locker_pos_x / self.game.map.width) * 100
+        deliverylocker_x_pos = (self.inner_screen_rect_width / 100) * deliverylocker_x_percent 
+        deliverylocker_y_percent = (locker_pos_y / self.game.map.height) * 100
+        deliverylocker_y_pos = (self.inner_screen_rect_height / 100) * deliverylocker_y_percent + self.y_offset # its calculated using 1% the size of the minimap multiplied by the above percent, innershift is new extra
+        deliverylocker_surf = self.game.drone_mm_icon_img.copy()
+        # final blit
+        self.image.blit(deliverylocker_surf, (deliverylocker_x_pos, deliverylocker_y_pos))
+
+
+
+
+

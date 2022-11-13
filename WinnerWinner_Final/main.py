@@ -8,7 +8,7 @@ from sprites import *
 from tilemap import *
 from lootable import Lootable, Workbench, Delivery_Locker
 from player import Player
-from gui import Mobile_Minimap
+from gui import Mobile_Minimap, Fullscreen_Map
 from menus import Inventory_Menu, Lootable_Menu, Delivery_Locker_Menu, Achievement
 
 class Game:
@@ -151,6 +151,8 @@ class Game:
         self.jackpot_img = pg.transform.scale(self.jackpot_img, (24, 24))
         self.player_p_img = pg.image.load(path.join(img_folder, PLAYER_P_ICON_IMG)).convert_alpha()
         self.player_p_img = pg.transform.scale(self.player_p_img, (24, 24))
+        self.drone_mm_icon_img = pg.image.load(path.join(img_folder, DRONE_IMG)).convert_alpha()
+        self.drone_mm_icon_img = pg.transform.scale(self.drone_mm_icon_img, (32, 32)) # (56, 56))
         # -- new drone test --
         self.drone_img = pg.image.load(path.join(img_folder, DRONE_IMG)).convert_alpha()
         self.drone_img = pg.transform.scale(self.drone_img, (140, 140)) # (56, 56))
@@ -177,6 +179,8 @@ class Game:
         self.map.rect = self.map_img.get_rect()
         # -- for minimap --
         self.all_lootable_positions = [] # grab these now for the minimap so we do it once using this setup loop otherwise we would have to do it per frame
+        self.map_locker_locations = []
+        self.map_workbench_locations = []
         # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
         for tile_object in self.map.tmxdata.objects:
             obj_center = vec(tile_object.x + tile_object.width / 2,
@@ -195,9 +199,11 @@ class Game:
                 self.all_lootable_positions.append((obj_center.x, obj_center.y))
             if tile_object.name == 'workbench': 
                 Workbench(self, obj_center.x, obj_center.y)
+                self.map_workbench_locations.append((obj_center.x, obj_center.y))
             if tile_object.name == "locker_y":
                 a_locker = Delivery_Locker(self, obj_center.x, obj_center.y, orientation="y")
                 self.locker_location = a_locker # temp af
+                self.map_locker_locations.append((obj_center.x, obj_center.y))
             if tile_object.name == "drone":
                 self.drone = Drone(self, obj_center.x, obj_center.y)
         # -- camera --         
@@ -210,6 +216,7 @@ class Game:
         # -- gui setup - minimap x menus --
         self.mobile_minimap = Mobile_Minimap(self) # now starting to move menus here so theyre initialised once at runtime and just drawn when valid
         self.delivery_locker_menu = Delivery_Locker_Menu(self) 
+        self.fullscreen_map = Fullscreen_Map(self)       
         # self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
         # self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)  
         # -- new test for turret but as a maker / creator / handler initially --
@@ -226,11 +233,13 @@ class Game:
         self.achievement_unlocks = False
         self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
         self.true_check_mouse_click = False
-        # quick test
+        # -- some test stuff --
         self.change_level = False
         self.took_locker_loot = False
         self.player_mouse_down = False
         self.start_delivery = False
+        # -- new test - for minimap --
+        self.show_map = False   
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -305,10 +314,10 @@ class Game:
     def draw(self):
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps())) # self.screen.fill(BGCOLOR)
         self.screen.blit(self.map_img, self.camera.apply(self.map))
-        # self.check_mouse_click = False
-        # self.draw_grid()
+        # new test 
+        # self.draw_grid() # self.check_mouse_click = False
         is_near_loot = False  # for resetting the charge meter when the player is out of range of any lootbox
-        for sprite in self.all_sprites:
+        for sprite in self.all_sprites:            
             # -- loop all Zombie instances and draw their gui elements --
             if isinstance(sprite, Zombie):
                 sprite.draw_unit_health()   
@@ -343,6 +352,7 @@ class Game:
                 # draw the delivery locker position to the map using the workbench method temporarily (just means the icon is wrong)
                 if self.mobile_minimap.current_state == "minimap":
                     self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                    # self.fullscreen_map.draw_workbenches(sprite.pos.x, sprite.pos.y)
                 # if you are near a delivery locker, draw the locker menu and highlight its image 
                 player_distance = (sprite.pos - self.player.pos).length()
                 if player_distance < 120:
@@ -360,10 +370,15 @@ class Game:
                 self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
                 sprite.draw_time()
                 sprite.draw_icons()
+            # -- New test for Fullscreen Map --
+            if isinstance(sprite, Fullscreen_Map):
+                if self.show_map:
+                    sprite.update() 
             # -- New super duper test for Drone --
             if isinstance(sprite, Drone):
                 if self.mobile_minimap.current_state == "minimap":
                     self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                    # self.fullscreen_map.draw_workbenches(sprite.pos.x, sprite.pos.y)
             # -- New Workbench initial test implementation --     
             if isinstance(sprite, Workbench): 
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
@@ -373,10 +388,11 @@ class Game:
                     self.draw_player_inventory()
                 if self.mobile_minimap.current_state == "minimap":
                     self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                    # self.fullscreen_map.draw_workbenches(sprite.pos.x, sprite.pos.y)
             else: # this if else is specific to Workbench? (as it has the blit done at the start)
                 # -- draws every sprite in the `all_sprites` group --
                 # except Workbench, and else -> guna just hard code what not to include now and refactor/clean up this section a bit shortly
-                if not isinstance(sprite, Workbench) and not isinstance(sprite, Drone):
+                if not isinstance(sprite, Workbench) and not isinstance(sprite, Drone) and not isinstance(sprite, Mobile_Minimap) and not isinstance(sprite, Fullscreen_Map):
                     self.screen.blit(sprite.image, self.camera.apply(sprite))
                 elif isinstance(sprite, Drone):
                     if not sprite.delivered: # when its "delivered" we wont draw it so it looks like its inside the box - just kinda simple temp way to do it for now anyways
@@ -519,12 +535,12 @@ class Game:
                     self.change_level = True 
                 if event.key == pg.K_o: # temp for changing mobile menus
                     mobile_page = self.mobile_minimap.current_state
-                    # toggle o just always takes us home
+                    # toggle key_o takes you to the mobile home page
                     if mobile_page != "home":
                         self.mobile_minimap.current_state = "home"
-                    
-                    # need to implement this
-                    # ... # needs to be flags as cant use this event loop for drawing per frame remember 
+                # new test for full screen map
+                if event.key == pg.K_m: # 'map' menu   
+                    self.show_map = not self.show_map           
 
     def handle_lootable_undo(self): 
         undo_item_id = list(self.lootable_undo.keys())[0]

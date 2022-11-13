@@ -119,3 +119,4 @@ sunday title stuff
 - sending specific item brought from the mobile store <3
 - collecting item to inventory <3
 - delivery item box highlighting based on rarity (well menu is but box soon)
+- new map lawd, and legit the most minor changes to get it to work from small mobile map to full screen which always makes me proud when stuff like dis happen :D
