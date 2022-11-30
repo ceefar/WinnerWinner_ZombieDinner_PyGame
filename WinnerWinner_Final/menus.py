@@ -1,9 +1,59 @@
 from settings import *
 
 
-class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class just havent got round to it yet... also should rename to just inventory menu, and also should be snake_case, oh the shame XD
-    def __init__(self, game, inventory_info:dict): # new default param on the_lootable allows us to blit this without having to have a lootable box near by (tho need to update appropriate mouse click functions if this is opened by pressing key i for inventory)
-        self._layer = MENU_LAYER # ITEMS_LAYER 
+class Delivery_Locker_Menu(pg.sprite.Sprite): # should really be Delivery_Locker_Locker_Menu but XD
+    def __init__(self, game): 
+        self._layer = MENU_LAYER
+        self.groups = game.menus 
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game, self.player = game, game.player
+        # -- image, position, & rect setup --
+        self.width, self.height = 300, 200
+        self.image = game.locker_1_img
+        self.rect = self.image.get_rect()
+    
+    def draw(self, the_locker):
+        self.the_locker = the_locker
+        x_offset, y_offset = -350, -260
+        self.pos = vec(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset)
+        self.destination_pos_rect = pg.Rect(the_locker.pos.x + x_offset, the_locker.pos.y + y_offset, self.width, self.height)
+        self.true_rect = self.game.screen.blit(self.image, self.game.camera.apply_rect(self.destination_pos_rect))
+        self.update_image(self.true_rect)
+        
+    def update_image(self, true_rect):
+        if self.game.drone.delivered and not self.game.took_locker_loot:
+            # print(f"{self.get_rarity_colour(self.game.drone.my_cargo[0]['loot_rarity'])}") # just realised the image isnt seperate so the outline will just be the whole menu lol, is fine for now
+            self.outline_mask(self.image, self.true_rect, 5, self.get_rarity_colour(self.game.drone.my_cargo[0]['loot_rarity']))
+            if true_rect.collidepoint(pg.mouse.get_pos()):
+                if self.game.player_mouse_down:
+                    self.game.took_locker_loot = True
+                    print(f"Player Took Loot")
+                    self.game.player_mouse_down = not self.game.player_mouse_down
+                    self.game.player.player_inventory[self.game.drone.my_cargo[0]['loot_id']] = self.game.drone.my_cargo[0]
+                    # print(f"{self.game.player_mouse_down =}")               
+        if self.game.drone.delivered and self.game.took_locker_loot:
+            self.image = self.game.locker_1_empty_img
+        elif self.game.drone.delivered:
+            self.image = self.game.locker_1_open_img
+
+    def get_rarity_colour(self, rarity_int):# yes, will do this properly shortly
+        rarities = {1:{"diff_buffer":400, "colour":TAN},2:{"diff_buffer":320, "colour":SKYBLUE},3:{"diff_buffer":25, "colour":LIME},4:{"diff_buffer":20, "colour":PURPLE},5:{"diff_buffer":15, "colour":BLUEGREEN},6:{"diff_buffer":10, "colour":YELLOW},7:{"diff_buffer":5, "colour":MAGENTA},8:{"diff_buffer":0, "colour":CYAN}}
+        return rarities[rarity_int]["colour"]               
+        
+    def outline_mask(self, img, loc, thickness=3, colr=WHITE):
+        mask = pg.mask.from_surface(img)
+        mask_outline = mask.outline()
+        n = 0
+        for point in mask_outline:
+            mask_outline[n] = point[0] + loc[0], point[1] + loc[1]
+            n += 1
+        pg.draw.polygon(self.game.screen, (colr), mask_outline, thickness)  
+
+
+# -- Inventory Menu parent implementation however added this after creating the class so will create a Player_Inventory child class shortly also and have a true Inventory_Menu class -- 
+class Inventory_Menu(pg.sprite.Sprite): 
+    def __init__(self, game, inventory_info:dict):
+        self._layer = MENU_LAYER 
         self.groups = game.menus 
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game, self.player = game, game.player
@@ -38,6 +88,80 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
         self.inventory_dict = final_inventory_info_dict # defo pass this as a parameter incase we want to have companion units with inventorys too
         # -- rects/positions of ui elements that have actions, e.g. undo, close window, scroll, etc --
         self.undo_button_rect = False
+
+    def check_user_click_menu_scroll(self, mouse): # needs a refactor as have just twigged the best way to do the whole mouse pos check flags stuff now we have scroll, undo, and also want x/close button (plus more scalability options in future, maybe slide - mmmmm)
+        scroll_amount = 10 # in pixels
+        if self.scroll_down_btn_rect.collidepoint(mouse):    
+            self.game.scroll_offset -= scroll_amount 
+        if self.scroll_up_btn_rect.collidepoint(mouse):    
+            if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0:
+                self.game.scroll_offset += scroll_amount
+
+    def check_user_click_menu(self, mouse):
+        if self.undo_button_rect.collidepoint(mouse):   
+            self.game.handle_player_undo() 
+        for id, info_dict in self.game.player.player_inventory.items(): # _ if not using id
+            rect = self.game.camera.apply_rect(info_dict["loot_rect"])
+            if rect.collidepoint(mouse):
+                return(info_dict)              
+
+    def add_gold(self, gold_to_add):
+        for id, info_dict in self.game.player.player_inventory.items():
+            if "gold" in info_dict["loot_type"]:
+                final_gold = info_dict["loot_value"] + gold_to_add
+                info_dict["loot_value"] = final_gold
+
+    def update(self):
+        if isinstance(self, Lootable_Menu):
+            self.item_rects = {}
+        true_scroll_offset = 0 if isinstance(self, Lootable_Menu) else self.game.scroll_offset # set the scroll offset to be 0 if its the lootable menu 
+        # loop all the items in the given inventory dictionary  
+        for i, (indx_id, item) in enumerate(self.inventory_dict.items()):
+            item_title, item_value = item["loot_name"], item["loot_value"] # item_id, item_rarity = item["loot_id"], item["loot_rarity"]            
+            if "gold" in item_title.lower(): # 100% needs to be a function huh
+                if item_value < 50:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Baby {item_title}", True, WHITE)
+                elif item_value >= 50 and item_value < 200:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Basic {item_title}", True, WHITE)
+                elif item_value >= 200 and item_value < 400:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Decent {item_title}", True, WHITE)
+                elif item_value >= 400 and item_value < 650:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
+                elif item_value >= 650 and item_value < 1000:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
+                elif item_value >= 1000 and item_value < 1400:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
+                elif item_value >= 1400 and item_value < 2000:
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
+                else:                    
+                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Giga {item_title}", True, WHITE)
+            else:                 
+                name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"{item_title}", True, WHITE)
+            if isinstance(self, Lootable_Menu):
+                name_subtextsurface = self.game.FONT_SILK_REGULAR_12.render(f"{item_value}", True, self.the_lootable.rarity_colour)
+            else:
+                name_subtextsurface = self.game.FONT_SILK_REGULAR_12.render(f"{item_value}", True, CYAN) # self.get_rarity_colour(self.player.open_box_rarity) <<< this will now be part of the items dictionary !
+            destination = (10, 5) 
+            sub_destination = (10, 25) 
+            item_text_rect = pg.rect.Rect(0, i* self.item_container_height + true_scroll_offset, self.length,  self.item_container_height)
+            item_text_bg_surf = pg.Surface((self.length,  self.item_container_height))
+            if i % 2 == 0:
+                item_text_bg_surf.fill(DARKGREY)
+            else:
+                item_text_bg_surf.fill(NICEGREY)
+            item_text_bg_surf.blit(name_textsurface, destination)
+            item_text_bg_surf.blit(name_subtextsurface, sub_destination)                
+            self.image.blit(item_text_bg_surf, item_text_rect)
+            if isinstance(self, Lootable_Menu):
+                self.item_rects[indx_id] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height) + true_scroll_offset, self.length,  self.item_container_height)
+            else:    
+                self.game.player.player_inventory[indx_id]["loot_rect"] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height) + true_scroll_offset, self.length,  self.item_container_height)
+        # blit the whole menu
+        destination = pg.rect.Rect(self.pos.x, self.pos.y, self.length, self.height)
+        self.game.screen.blit(self.image, self.game.camera.apply_rect(destination))
+
+    # remember types, stacking, consuming, undo, delete, etc, see todo notes and lootable.py notes
+    # - especially cause why stylise especially as colours n shit until items done especially as i said for rarity
 
     def draw_inventory_styling(self): # whole thing needs to be chunked into functions and generally cleaned up tho
         """ for the little gui extras like undo button, scroll buttons, header, etc...
@@ -101,81 +225,6 @@ class Inventory_Menu(pg.sprite.Sprite): # ideally would do a parent menu class j
                 self.game.screen.blit(undo_button_surf, undo_button_dest)
         self.game.screen.blit(header_text_surf, header_destination)
 
-    def update(self):
-        if isinstance(self, Lootable_Menu):
-            self.item_rects = {}
-        true_scroll_offset = 0 if isinstance(self, Lootable_Menu) else self.game.scroll_offset # set the scroll offset to be 0 if its the lootable menu 
-        # loop all the items in the given inventory dictionary  
-        for i, (indx_id, item) in enumerate(self.inventory_dict.items()):
-            item_title, item_value = item["loot_name"], item["loot_value"] # item_id, item_rarity = item["loot_id"], item["loot_rarity"]            
-            if "gold" in item_title.lower(): # 100% needs to be a function huh
-                if item_value < 50:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Baby {item_title}", True, WHITE)
-                elif item_value >= 50 and item_value < 200:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Basic {item_title}", True, WHITE)
-                elif item_value >= 200 and item_value < 400:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Decent {item_title}", True, WHITE)
-                elif item_value >= 400 and item_value < 650:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
-                elif item_value >= 650 and item_value < 1000:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
-                elif item_value >= 1000 and item_value < 1400:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
-                elif item_value >= 1400 and item_value < 2000:
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Uber {item_title}", True, WHITE)
-                else:                    
-                    name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"Giga {item_title}", True, WHITE)
-            else:                 
-                name_textsurface = self.game.FONT_SILK_REGULAR_16.render(f"{item_title}", True, WHITE)
-            if isinstance(self, Lootable_Menu):
-                name_subtextsurface = self.game.FONT_SILK_REGULAR_12.render(f"{item_value}", True, self.the_lootable.rarity_colour)
-            else:
-                name_subtextsurface = self.game.FONT_SILK_REGULAR_12.render(f"{item_value}", True, CYAN) # self.get_rarity_colour(self.player.open_box_rarity) <<< this will now be part of the items dictionary !
-            destination = (10, 5) 
-            sub_destination = (10, 25) 
-            item_text_rect = pg.rect.Rect(0, i* self.item_container_height + true_scroll_offset, self.length,  self.item_container_height)
-            item_text_bg_surf = pg.Surface((self.length,  self.item_container_height))
-            if i % 2 == 0:
-                item_text_bg_surf.fill(DARKGREY)
-            else:
-                item_text_bg_surf.fill(NICEGREY)
-            item_text_bg_surf.blit(name_textsurface, destination)
-            item_text_bg_surf.blit(name_subtextsurface, sub_destination)                
-            self.image.blit(item_text_bg_surf, item_text_rect)
-            if isinstance(self, Lootable_Menu):
-                self.item_rects[indx_id] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height) + true_scroll_offset, self.length,  self.item_container_height)
-            else:    
-                self.game.player.player_inventory[indx_id]["loot_rect"] = pg.rect.Rect(self.pos.x, self.pos.y + (i *  self.item_container_height) + true_scroll_offset, self.length,  self.item_container_height)
-        # blit the whole menu
-        destination = pg.rect.Rect(self.pos.x, self.pos.y, self.length, self.height)
-        self.game.screen.blit(self.image, self.game.camera.apply_rect(destination))
-
-    def check_user_click_menu_scroll(self, mouse): # needs a refactor as have just twigged the best way to do the whole mouse pos check flags stuff now we have scroll, undo, and also want x/close button (plus more scalability options in future, maybe slide - mmmmm)
-        scroll_amount = 10 # in pixels
-        if self.scroll_down_btn_rect.collidepoint(mouse):    
-            # if self.current_scroll_pos < self.true_height + int(self.item_container_height * 2):
-                self.game.scroll_offset -= scroll_amount 
-            # print(f"SCROLL DOWN  {self.game.scroll_offset = }")
-        if self.scroll_up_btn_rect.collidepoint(mouse):    
-            if self.game.scroll_offset < 0 and not self.game.scroll_offset == 0:
-                self.game.scroll_offset += scroll_amount
-                # print(f"SCROLL UP {self.game.scroll_offset = }")
-
-    def check_user_click_menu(self, mouse):
-        # print(f"Debuggy! \n{self.undo_button_rect = } \n{self.scroll_up_btn_rect = } \n{pg.mouse.get_pos() = }")
-        if self.undo_button_rect.collidepoint(mouse):   
-            self.game.handle_player_undo() 
-        for id, info_dict in self.game.player.player_inventory.items(): # _ if not using id
-            rect = self.game.camera.apply_rect(info_dict["loot_rect"])
-            if rect.collidepoint(mouse): # print(f"{rect = }") # print(f"{info_dict = }") # print(f"{self.inventory_dict[id] = }")
-                return(info_dict)              
-
-    def add_gold(self, gold_to_add):
-        for id, info_dict in self.game.player.player_inventory.items():
-            if "gold" in info_dict["loot_type"]:
-                final_gold = info_dict["loot_value"] + gold_to_add
-                info_dict["loot_value"] = final_gold
-
     
 # quick child implementation, do ideally need to refactor above to be a true Menu parent class and have two children one Lootable_Menu and one Player_Menu
 class Lootable_Menu(Inventory_Menu):
@@ -194,10 +243,6 @@ class Lootable_Menu(Inventory_Menu):
             if rect.collidepoint(mouse):
                 return self.inventory_dict[loot_id]   
     
-
-# remember types, stacking, consuming, undo, delete, etc, see todo notes and lootable.py notes
-# - especially cause why stylise especially as colours n shit until items done especially as i said for rarity
-
     
 class Achievement(pg.sprite.Sprite): # atleast so this semi properly so you can pass it either a string, or some kinda dict that will have id keys for these kinda events (string is fine lmao)
     def __init__(self, game):

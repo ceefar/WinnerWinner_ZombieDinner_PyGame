@@ -38,6 +38,7 @@ BROWNTONE3 = (101, 66, 22)      # FOR BUILDING BARRACADES
 BROWNTONE4 = (66, 40, 2)        # HOVERING FULLY BUILT BARRACADE, SHOWS SLIGHTLY DARKER TO INDICATE NULL INTERACTION BETTER THAN NOTHING 
 BROWNPALE =  (215, 195, 163)
 BLUEMIDNIGHT = (0, 51, 102)
+GOOGLEMAPSBLUE = (187,197,233)
 
 # -- General Settings --
 WIDTH = 1024   # 16 * 64 or 32 * 32 or 64 * 16
@@ -131,12 +132,40 @@ MOB_HEALTH_BAR_LENGTH, MOB_HEALTH_BAR_HEIGHT = 100, 16
 HP_BAR_HP_SEGMENT = 50 # for strips between bars, serves to indicate a block/chunk of hp and ** not ** relative to the bar length
 
 # Lootables
-LOOT_BOX_1_IMG = 'lootable_box_1.png'
-LOOT_BOX_2_IMG = 'lootable_box_2.png'
-LOOT_BOX_3_IMG = 'lootable_box_3.png'
-LOOT_BOX_4_IMG = 'lootable_box_4.png'
-LOOT_BOX_5_IMG = 'lootable_box_5.png'
-LOOT_BOX_6_IMG = 'lootable_box_6.png'
+LOOT_BOX_1_IMG = "lootable_box_1.png"
+LOOT_BOX_2_IMG = "lootable_box_2.png"
+LOOT_BOX_3_IMG = "lootable_box_3.png"
+LOOT_BOX_4_IMG = "lootable_box_4.png"
+LOOT_BOX_5_IMG = "lootable_box_5.png"
+LOOT_BOX_6_IMG = "lootable_box_6.png"
+
+# New Concept Test - Workbench
+WORKBENCH_IMG = "workbench_concept_3.png" # workbench_concept_1
+
+# New Concept Test - Delivery Locker
+LOCKER_TEST_IMG = "locker_test_img.png" # locker2 locker1
+LOCKER_TEST_OPEN_IMG = "locker_test_img_open.png" # locker2 locker1
+LOCKER_TEST_EMPTY_IMG = "locker_test_img_empty.png" # locker2 locker1
+DELIVERY_LOCKER_CLOSED_TOP_IMG = "locker_top_test_img1.png"
+DELIVERY_LOCKER_OPEN_TOP_IMG = "locker_top_test_img2.png"
+
+# New Concept Test - Drone / Delivery Drone
+DRONE_IMG = "drone.png"
+
+# UI - Mobile Minimap
+MOBILE_IMG = "mobile_1.png" # nokia_1
+BATTERY_FULL_IMG = "battery_full_1.png"
+BATTERY_EMPTY_IMG = "battery_empty_1.png"
+BATTERY_BLANK_IMG = "battery_blank_1.png"
+MAPS_ICON_MOBILE_IMG = "MapsIcon.png"
+SHOPPING_ICON_MOBILE_IMG = "ShoppingIcon.png"
+STORE_ITEM_IMG_CASINO = "store_item_casino_1.png"
+STORE_ITEM_IMG_HANDGUN = "store_item_handgun_1.png"
+STORE_ITEM_IMG_LOOTBOX = "store_item_lootbox_1.png"
+STORE_ITEM_IMG_WEAPON_UPGRADE = "store_item_weapon_upgrade_1.png"
+WRENCH_ICON_IMG = 'minimap_tools_icon.png' # < testing sumnt
+JACKPOT_ICON_IMG = 'minimap_jackpot_icon.png' 
+PLAYER_P_ICON_IMG = 'minimap_player_icon.png' 
 
 # General Handy Stuff
 def round_to_base(x, base=5): 

@@ -72,5 +72,51 @@
 - first working implementation of scroll, using only buttons, works well tho <3
 - scrolling with locking in x and y based on dynamic true scroll position
 - hiding scroll buttons when not relevant (cant scroll up or down as at top or bottom)
+- reverted slightly due to scrollbar issues
+- tested out a `grappling` concept that i will now be adding later on as it can be implemented quite easily
 
-- its actually looking really good, do need to fix the potential placement issues and add the scrollbar next to be satisfied tho (icons / triangles / arrows too - literally just need one and rotate it)
+# v1.05 x v1.051 x v1.052 10/11
+[half-day-as-had-drs-apt-n-ting]
+- absolutely just had a load of things about classes and oop class structure twig in my head
+- started on a concept gui but only partly doing it as is diminising returns
+- new mobile gui minimap
+- added player
+- added loot using the setup/init loop to avoid excess reptition 
+- home page toggle initial setup
+- home page clickable setup working
+- clean home button function x functionality working across all pages 
+- fixed some bugs with mouse click state issues across multiple menu types
+- basic store front layout mockup
+
+# v1.052 - v1.07 11/11
+[clapping]
+- feel like ive had huge learning breakthroughs, particularly in oop, over the last two days
+- added maps and home icons and polished the mobile menu functionality a tad
+- basic test af implementation of changing zone at map edge, tho implemented on button press while testing 
+    - when doing this properly obvs need to have the player stats persisting so will need to refactor to pass the player between levels (which is fine)
+- improved the minimap display to gta style icons
+
+# v1.07 and v1.071
+[still-clapping-main-flow-plus-testing-branches-too]
+- tested concept for new full screen minimap, will be implementing shortly
+- delivery locker initial test implementation
+- refactoring Lootable class structure into Menuable parent child class based structure
+    - with first child being the delivery locker (rest will be lootable and workbench)
+- delivery locker menu first implementation added, still much clean very wow
+- added lockers to the (soon to be updated) minimap, no unique icon yet tho just using the workbench one for now 
+- added locker temp image
+- hover state and clicked trigger flag for buy now button in mobile store
+- drone lawd
+
+
+sunday title stuff
+- updated locker image to have open or closed top depending on loading
+- small rework of how images are loading based on states for lockers n drone
+- drone now going "inside" the locker
+- can now tap and "collect" the item, tho not actually done the inventory or true item yet
+- update onclick functionality, need to overhaul this now i understand its limitations better
+- onclick buy now drone now working
+- sending specific item brought from the mobile store <3
+- collecting item to inventory <3
+- delivery item box highlighting based on rarity (well menu is but box soon)
+- new map lawd, and legit the most minor changes to get it to work from small mobile map to full screen which always makes me proud when stuff like dis happen :D

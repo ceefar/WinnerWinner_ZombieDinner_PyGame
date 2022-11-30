@@ -6,11 +6,10 @@ from zombie import *
 from settings import *
 from sprites import *
 from tilemap import *
-from lootable import Lootable
+from lootable import Lootable, Workbench, Delivery_Locker
 from player import Player
-from menus import Inventory_Menu, Lootable_Menu, Achievement
-
-
+from gui import Mobile_Minimap, Fullscreen_Map
+from menus import Inventory_Menu, Lootable_Menu, Delivery_Locker_Menu, Achievement
 
 class Game:
     def __init__(self):
@@ -20,6 +19,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.load_data()
+        self.current_level = 1
 
     def load_data(self):
         game_folder = path.dirname(__file__)
@@ -89,6 +89,7 @@ class Game:
         self.FONT_SILK_REGULAR_14 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 14)
         self.FONT_SILK_REGULAR_16 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 16)
         self.FONT_SILK_REGULAR_18 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 18)
+        self.FONT_SILK_REGULAR_20 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 20)
         self.FONT_SILK_REGULAR_22 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 22)
         self.FONT_SILK_REGULAR_24 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 24)
         self.FONT_SILK_REGULAR_32 = pg.font.Font("C:/Users/robfa/Downloads/PyGame_FinalRefactor/WinnerWinner_Final/fonts/Silkscreen-Regular.ttf", 32)
@@ -113,8 +114,50 @@ class Game:
         self.lootbox_small_4_large_img = pg.transform.scale(self.lootbox_small_4_img, (58, 58))
         self.lootbox_small_5_large_img = pg.transform.scale(self.lootbox_small_5_img, (58, 58))
         self.lootbox_small_6_large_img = pg.transform.scale(self.lootbox_small_6_img, (58, 58))
+        # -- mobile minimap x hud --
+        self.mobile_img = pg.image.load(path.join(img_folder, MOBILE_IMG)).convert_alpha()
+        self.mobile_img = pg.transform.scale(self.mobile_img, (320, 660))
+        self.battery_full_img = pg.image.load(path.join(img_folder, BATTERY_FULL_IMG)).convert_alpha()
+        self.battery_full_img = pg.transform.scale(self.battery_full_img, (34, 18))
+        self.battery_empty_img = pg.image.load(path.join(img_folder, BATTERY_EMPTY_IMG)).convert_alpha()
+        self.battery_empty_img = pg.transform.scale(self.battery_empty_img, (34, 18))
+        self.battery_blank_img = pg.image.load(path.join(img_folder, BATTERY_BLANK_IMG)).convert_alpha()
+        self.battery_blank_img = pg.transform.scale(self.battery_blank_img, (34, 18))
+        # -- home --
+        self.shopping_icon_mobile_img = pg.image.load(path.join(img_folder, SHOPPING_ICON_MOBILE_IMG)).convert_alpha()
+        self.shopping_icon_mobile_img = pg.transform.scale(self.shopping_icon_mobile_img, (73, 73))
+        self.maps_icon_mobile_img = pg.image.load(path.join(img_folder, MAPS_ICON_MOBILE_IMG)).convert_alpha()
+        self.maps_icon_mobile_img = pg.transform.scale(self.maps_icon_mobile_img, (73, 73))
+        # -- store --
+        self.store_item_casino_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_CASINO)).convert_alpha()
+        self.store_item_casino_img = pg.transform.scale(self.store_item_casino_img, (56, 56))
+        self.store_item_weapon_upgrade_img = pg.image.load(path.join(img_folder, STORE_ITEM_IMG_WEAPON_UPGRADE)).convert_alpha()
+        self.store_item_weapon_upgrade_img = pg.transform.scale(self.store_item_weapon_upgrade_img, (56, 56))
+        # -- workbench & delivery locker, and locker menu test concept images --        
+        self.workbench_img = pg.image.load(path.join(img_folder, WORKBENCH_IMG)).convert_alpha()
+        self.workbench_img = pg.transform.scale(self.workbench_img, (128, 48))
+        self.delivery_locker_closed_img = pg.image.load(path.join(img_folder, DELIVERY_LOCKER_CLOSED_TOP_IMG)).convert_alpha() # the in world locker obstacle x object
+        self.delivery_locker_open_img = pg.image.load(path.join(img_folder, DELIVERY_LOCKER_OPEN_TOP_IMG)).convert_alpha()
+        self.locker_1_img = pg.image.load(path.join(img_folder, LOCKER_TEST_IMG)).convert_alpha() # the locker menu
+        self.locker_1_img = pg.transform.scale(self.locker_1_img, (300, 170))
+        self.locker_1_open_img = pg.image.load(path.join(img_folder, LOCKER_TEST_OPEN_IMG)).convert_alpha()
+        self.locker_1_open_img = pg.transform.scale(self.locker_1_open_img, (300, 170))
+        self.locker_1_empty_img = pg.image.load(path.join(img_folder, LOCKER_TEST_EMPTY_IMG)).convert_alpha()
+        self.locker_1_empty_img = pg.transform.scale(self.locker_1_empty_img, (300, 170))
+        # -- test - group with minimap if keeping --
+        self.wrench_img = pg.image.load(path.join(img_folder, WRENCH_ICON_IMG)).convert_alpha()
+        self.wrench_img = pg.transform.scale(self.wrench_img, (24, 24))
+        self.jackpot_img = pg.image.load(path.join(img_folder, JACKPOT_ICON_IMG)).convert_alpha()
+        self.jackpot_img = pg.transform.scale(self.jackpot_img, (24, 24))
+        self.player_p_img = pg.image.load(path.join(img_folder, PLAYER_P_ICON_IMG)).convert_alpha()
+        self.player_p_img = pg.transform.scale(self.player_p_img, (24, 24))
+        self.drone_mm_icon_img = pg.image.load(path.join(img_folder, DRONE_IMG)).convert_alpha()
+        self.drone_mm_icon_img = pg.transform.scale(self.drone_mm_icon_img, (32, 32)) # (56, 56))
+        # -- new drone test --
+        self.drone_img = pg.image.load(path.join(img_folder, DRONE_IMG)).convert_alpha()
+        self.drone_img = pg.transform.scale(self.drone_img, (140, 140)) # (56, 56))
 
-    def new(self):
+    def play_map_1(self):
         # initialize all variables and do all the setup for a new game
         self.all_map_lootables = {} # includes loot details for each lootable
         self.all_sprites = pg.sprite.LayeredUpdates()
@@ -125,10 +168,19 @@ class Game:
         self.items = pg.sprite.Group()
         self.lootables = pg.sprite.Group()
         self.menus = pg.sprite.Group()
+        self.minimaps = pg.sprite.Group()
+        # quick test
+        self.menuables = pg.sprite.Group()
+        self.workbenches = pg.sprite.Group()
+        self.delivery_lockers = pg.sprite.Group()
         # -- current level map setup -- 
         self.map = TiledMap(path.join(self.map_folder, 'level_large.tmx'))
         self.map_img = self.map.make_map()
         self.map.rect = self.map_img.get_rect()
+        # -- for minimap --
+        self.all_lootable_positions = [] # grab these now for the minimap so we do it once using this setup loop otherwise we would have to do it per frame
+        self.map_locker_locations = []
+        self.map_workbench_locations = []
         # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
         for tile_object in self.map.tmxdata.objects:
             obj_center = vec(tile_object.x + tile_object.width / 2,
@@ -143,7 +195,17 @@ class Game:
             if tile_object.name in ['health', 'shotgun']:
                 Item(self, obj_center, tile_object.name)
             if tile_object.name == 'lootable_box_small': 
-                Lootable(self, obj_center.x, obj_center.y, tile_object.name)       
+                Lootable(self, obj_center.x, obj_center.y, tile_object.name)
+                self.all_lootable_positions.append((obj_center.x, obj_center.y))
+            if tile_object.name == 'workbench': 
+                Workbench(self, obj_center.x, obj_center.y)
+                self.map_workbench_locations.append((obj_center.x, obj_center.y))
+            if tile_object.name == "locker_y":
+                a_locker = Delivery_Locker(self, obj_center.x, obj_center.y, orientation="y")
+                self.locker_location = a_locker # temp af
+                self.map_locker_locations.append((obj_center.x, obj_center.y))
+            if tile_object.name == "drone":
+                self.drone = Drone(self, obj_center.x, obj_center.y)
         # -- camera --         
         self.camera = Camera(self.map.width, self.map.height)
         # -- general -- 
@@ -151,6 +213,16 @@ class Game:
         self.night = False
         if self.game_volume > 0.0:
             self.effects_sounds['level_start'].play()
+        # -- gui setup - minimap x menus --
+        self.mobile_minimap = Mobile_Minimap(self) # now starting to move menus here so theyre initialised once at runtime and just drawn when valid
+        self.delivery_locker_menu = Delivery_Locker_Menu(self) 
+        self.fullscreen_map = Fullscreen_Map(self)       
+        # self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
+        # self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)  
+        # -- new test for turret but as a maker / creator / handler initially --
+        # self.turret_maker = Turret_Maker(self)
+        # -- for potential addition --
+        self.player_battery_level = 100 # would go for percent ig
         # -- misc --
         self.current_lock_time = 0 # needs to be initialised before starting
         self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
@@ -160,6 +232,14 @@ class Game:
         self.cheevo_counter = 0 # wanna replace this for just a close button on the achievement, for now its just a faux timer
         self.achievement_unlocks = False
         self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
+        self.true_check_mouse_click = False
+        # -- some test stuff --
+        self.change_level = False
+        self.took_locker_loot = False
+        self.player_mouse_down = False
+        self.start_delivery = False
+        # -- new test - for minimap --
+        self.show_map = False   
 
     def run(self):
         # game loop - set self.playing = False to end the game
@@ -234,9 +314,16 @@ class Game:
     def draw(self):
         pg.display.set_caption("{:.2f}".format(self.clock.get_fps())) # self.screen.fill(BGCOLOR)
         self.screen.blit(self.map_img, self.camera.apply(self.map))
-        # self.draw_grid()
+        # new test 
+        # self.draw_grid() # self.check_mouse_click = False
         is_near_loot = False  # for resetting the charge meter when the player is out of range of any lootbox
-        for sprite in self.all_sprites:
+        for sprite in self.all_sprites:            
+            # -- loop all Zombie instances and draw their gui elements --
+            if isinstance(sprite, Zombie):
+                sprite.draw_unit_health()   
+                sprite.draw_unit_name()
+                sprite.draw_unit_status()
+                sprite.draw_unit_level()
             # -- loop all lootboxes and draw to their surfaces --
             if isinstance(sprite, Lootable):
                 player_distance = (sprite.pos - self.player.pos).length()
@@ -252,27 +339,69 @@ class Game:
                         self.current_lock_time = sprite.lock_diff_time # make this a game variable so the player can access it outside of looping all instances 
                         charge_percent = (self.player.charging / sprite.lock_diff_time) * 100 # watch for possible zero div error here tho is an easy fix tbf
                         sprite.blit_chargebar(charge_percent)
-                        # print(f"{self.player.charging: = } {sprite.lock_diff_time} {self.player.lockpicking_skill_points * 100}")   
                         if self.player.charging >= sprite.lock_diff_time:
                             if sprite.can_player_open():
-                                self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)     
+                                self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)      
                                 self.lootable_inventory_menu = Lootable_Menu(self, sprite.my_loot, sprite)     
                                 self.draw_player_inventory()       
                                 self.draw_lootable_menu()       
                                 # if the inventory is open then also check for user mouse click inputs
-                                self.check_mouse_click = True # could rename this to menu_is_open_check_click for clarity but is a bit wordy huh    
-                                # print(f"{self.check_click = }")            
-            # -- loop all zombies and draw them --
-            if isinstance(sprite, Zombie):
-                sprite.draw_unit_health()   
-                sprite.draw_unit_name()
-                sprite.draw_unit_status()
-                sprite.draw_unit_level()
-            # -- draws every sprite in the `all_sprites` group
-            self.screen.blit(sprite.image, self.camera.apply(sprite))
+                                self.check_mouse_click = True # could rename this to menu_is_open_check_click for clarity but is a bit wordy huh          
+            # -- New Delivery Locker initial test implementation --     
+            if isinstance(sprite, Delivery_Locker):
+                # draw the delivery locker position to the map using the workbench method temporarily (just means the icon is wrong)
+                if self.mobile_minimap.current_state == "minimap":
+                    self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                    # self.fullscreen_map.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                # if you are near a delivery locker, draw the locker menu and highlight its image 
+                player_distance = (sprite.pos - self.player.pos).length()
+                if player_distance < 120:
+                    sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
+                    self.delivery_locker_menu.draw(sprite)
+                # the drone has arrived use the image that shows the top open
+                if self.drone.target_dist.length() < 85: 
+                    sprite.image = self.delivery_locker_open_img
+                # if delivered use the og img with the shut top, obvs will just animate this, obvs will make a function to handle images properly in the class itself
+                if self.drone.delivered:
+                    sprite.image = self.delivery_locker_closed_img
+            # -- Mobile Minimap initial test implementation --                 
+            if isinstance(sprite, Mobile_Minimap):
+                sprite.draw_current_page()
+                self.screen.blit(self.mobile_minimap.image, self.mobile_minimap.pos)
+                sprite.draw_time()
+                sprite.draw_icons()
+            # -- New test for Fullscreen Map --
+            if isinstance(sprite, Fullscreen_Map):
+                if self.show_map:
+                    sprite.update() 
+            # -- New super duper test for Drone --
+            if isinstance(sprite, Drone):
+                if self.mobile_minimap.current_state == "minimap":
+                    self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                    # self.fullscreen_map.draw_workbenches(sprite.pos.x, sprite.pos.y)
+            # -- New Workbench initial test implementation --     
+            if isinstance(sprite, Workbench): 
+                self.screen.blit(sprite.image, self.camera.apply(sprite))
+                did_outline = sprite.outline_mask(self.camera.apply_rect(sprite.rect), 10)
+                if did_outline: 
+                    self.player_inventory_menu = Inventory_Menu(self, self.player.player_inventory)   
+                    self.draw_player_inventory()
+                if self.mobile_minimap.current_state == "minimap":
+                    self.mobile_minimap.draw_workbenches(sprite.pos.x, sprite.pos.y)
+                    # self.fullscreen_map.draw_workbenches(sprite.pos.x, sprite.pos.y)
+            else: # this if else is specific to Workbench? (as it has the blit done at the start)
+                # -- draws every sprite in the `all_sprites` group --
+                # except Workbench, and else -> guna just hard code what not to include now and refactor/clean up this section a bit shortly
+                if not isinstance(sprite, Workbench) and not isinstance(sprite, Drone) and not isinstance(sprite, Mobile_Minimap) and not isinstance(sprite, Fullscreen_Map):
+                    self.screen.blit(sprite.image, self.camera.apply(sprite))
+                elif isinstance(sprite, Drone):
+                    if not sprite.delivered: # when its "delivered" we wont draw it so it looks like its inside the box - just kinda simple temp way to do it for now anyways
+                        self.screen.blit(sprite.image, self.camera.apply(sprite))
+
             # -- draw dev mode / debug mode rects, hit boxes, and info --
             if self.draw_debug:
                 pg.draw.rect(self.screen, CYAN, self.camera.apply_rect(sprite.hit_rect), 1) # draw the objects hit rect
+
         # -- resets the chargebar if the player is out of range of any lootbox --
         if not is_near_loot:
             self.player.charging = 0
@@ -302,7 +431,6 @@ class Game:
             self.draw_text("Paused", self.title_font, 105, RED, WIDTH / 2, HEIGHT / 2, align="center")
         pg.display.flip()
 
-
     # ---- temp af af af ---- 
     def process_gold(self, ): # refactored so now this can be used to calculate gold stacking via inventory additions but need to actually refactor player currency so its much more simplified
         starting_gold = 0
@@ -312,7 +440,6 @@ class Game:
                 starting_gold += cash_money
         return starting_gold
     # ---- end temp af af af ----         
-
 
     def draw_player_inventory(self):
         # as its in multiple locations (button press, open lootable object) we keep this in its own function incase we want to expand the functionality
@@ -327,57 +454,61 @@ class Game:
     def events(self):
         # handle events here
         for event in pg.event.get():
-            # -- mouse events --           
-            if event.type == pg.MOUSEBUTTONUP:
-                # try:
-                    if self.check_mouse_click:
-                        mouse_pos = pg.mouse.get_pos() # mays well define this here
-                        # check click actions in either player inventory or lootable inventory menus
-                        selected_loot = self.player_inventory_menu.check_user_click_menu(mouse_pos)
-                        selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(mouse_pos)
-                        # check if player inventory menu has a clicked scroll button
-                        self.player_inventory_menu.check_user_click_menu_scroll(mouse_pos)
-                        # lootable inventory click actions
-                        if selected_inventory_loot:
-                            print(f"\nSelected Lootable Item - {selected_inventory_loot['loot_id']}\n{selected_inventory_loot}\n") 
-                            if selected_inventory_loot['is_stackable']:
-                                if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
-                                    if self.temp_player_wallet > 0:
-                                        print(f"Stack da gold")
-                                        self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
-                                        self.last_undo_action = "g>g" # gold stacked on gold, no undo
+            # -- mouse events --       
+            self.player_mouse_down = False # ensure its reset initially every frame
+            if event.type == pg.MOUSEBUTTONDOWN:
+                self.player_mouse_down = True  
+            if event.type == pg.MOUSEBUTTONUP: # <- own function duh
+                self.true_check_mouse_click = True
+                clicked_home_icon = self.mobile_minimap.check_click_home_buttons() # ik
+                try: 
+                    if not clicked_home_icon:
+                        if self.check_mouse_click: 
+                            mouse_pos = pg.mouse.get_pos() # mays well define this here
+                            # check click actions in either player inventory or lootable inventory menus
+                            selected_loot = self.player_inventory_menu.check_user_click_menu(mouse_pos)
+                            selected_inventory_loot = self.lootable_inventory_menu.check_user_click_menu(mouse_pos)
+                            # check if player inventory menu has a clicked scroll button
+                            self.player_inventory_menu.check_user_click_menu_scroll(mouse_pos)
+                            # lootable inventory click actions
+                            if selected_inventory_loot:
+                                if selected_inventory_loot['is_stackable']:
+                                    if selected_inventory_loot['loot_type'] == "gold": # is the only stackable for now anyways but leaving as planning to expand                                      
+                                        if self.temp_player_wallet > 0:                                        
+                                            self.player_inventory_menu.add_gold(selected_inventory_loot["loot_value"]) # but dont add it to inventory like the others below, bosh
+                                            self.last_undo_action = "g>g" # gold stacked on gold, no undo
+                                        else:
+                                            self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                                     else:
-                                        print(f"Add da gold")
                                         self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
                                 else:
                                     self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
-                            else:
-                                self.player.player_inventory[selected_inventory_loot['loot_id']] = selected_inventory_loot                            
-                            self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
-                            self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
-                            if not self.last_undo_action == "g>g": # since we set this before we have to make sure it doesnt get overwritten
-                                self.last_undo_action = "i>p"
-                        # player inventory click actions
-                        if selected_loot:
-                            print(f"Ladies & Gentleman, we got a YEET!\n=> {selected_loot}") # dont need to return the idea but just quickly think to be sure before finalising
-                            selected_loot_id = selected_loot["loot_id"]
-                            del_index = 0
-                            for key, item in self.player.player_inventory.items():
-                                if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
-                                    del_index = key
-                            self.player_undo = {del_index:self.player.player_inventory[del_index]}
-                            self.player.player_inventory.pop(del_index)
-                            if not self.last_undo_action == "g>g":
-                                self.last_undo_action = "p>d"
-                            self.player_threw_gold = True
-                            for a_item_dict in self.player.player_inventory.values():
-                                if "gold" in a_item_dict["loot_type"]:
-                                    self.player_threw_gold = False
+                                self.lootable_inventory_menu.the_lootable.my_loot.pop(selected_inventory_loot['loot_id']) 
+                                self.lootable_undo = {selected_inventory_loot['loot_id']: selected_inventory_loot}
+                                if not self.last_undo_action == "g>g": # since we set this before we have to make sure it doesnt get overwritten
+                                    self.last_undo_action = "i>p"
+                            # player inventory click actions
+                            if selected_loot:
+                                selected_loot_id = selected_loot["loot_id"]
+                                del_index = 0
+                                for key, item in self.player.player_inventory.items():
+                                    if item["loot_id"] == selected_loot_id: # note - this problem actually would be easily resolved by making the id also the key but im totally unsure of the interactions until i test it so just trying one implementation first to see which feels best
+                                        del_index = key
+                                self.player_undo = {del_index:self.player.player_inventory[del_index]}
+                                self.player.player_inventory.pop(del_index)
+                                if not self.last_undo_action == "g>g":
+                                    self.last_undo_action = "p>d"
+                                self.player_threw_gold = True
+                                for a_item_dict in self.player.player_inventory.values():
+                                    if "gold" in a_item_dict["loot_type"]:
+                                        self.player_threw_gold = False
                 # incase you click when the menu isnt up, can add a bool to supercede this shortly
-                # except AttributeError as atrErr:
-                #     print(f"{atrErr = }")  
-                #     except TypeError as typErr:
-                #         print(f"{typErr = }")                   
+                except AttributeError as atrErr:
+                    print(f"{atrErr = }")  
+                # #     except TypeError as typErr:
+                # #         print(f"{typErr = }")   
+            else:
+                self.true_check_mouse_click = False                
             # -- quit event --
             if event.type == pg.QUIT:
                 self.quit()
@@ -395,15 +526,25 @@ class Game:
                     self.player.charging = 0 # should make a handler function for this now huh
                     self.player_undo = False
                     self.lootable_undo = False
-                if event.key == pg.K_i: # 'inventory' menu                
-                    # need to implement this
-                    ... # needs to be flags as cant use this event loop for drawing per frame remember 
+                if event.key == pg.K_i: # 'inventory' menu   
+                    self.mobile_minimap.update_mobile_position(400)
+                if event.key == pg.K_l: # change 'level' - test af
+                    print(f"{self.current_level = }")
+                    self.current_level = 2 if self.current_level == 1 else 1
+                    self.playing = False
+                    self.change_level = True 
+                if event.key == pg.K_o: # temp for changing mobile menus
+                    mobile_page = self.mobile_minimap.current_state
+                    # toggle key_o takes you to the mobile home page
+                    if mobile_page != "home":
+                        self.mobile_minimap.current_state = "home"
+                # new test for full screen map
+                if event.key == pg.K_m: # 'map' menu   
+                    self.show_map = not self.show_map           
 
     def handle_lootable_undo(self): 
-        # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
         undo_item_id = list(self.lootable_undo.keys())[0]
         undo_item_dictionary = list(self.lootable_undo.values())[0]
-        # print(f"{undo_item_dictionary = }, {undo_item_id = }")
         if self.last_undo_action == "i>p": # if the last action was inventory to player
             self.lootable_inventory_menu.the_lootable.my_loot[undo_item_id] = undo_item_dictionary
             self.player.player_inventory.pop(undo_item_id) # also remove form the player since we've brought it back to the lootable with this undo
@@ -416,15 +557,8 @@ class Game:
             self.lootable_undo = False 
         
     def handle_player_undo(self): 
-        # print(f"FINAL DEBUG => {self.last_undo_action = } {self.player_undo = }, {self.lootable_undo = }")
-
-        # f*ck me, actually not checking the rects here - no wait we are wtf 
-        # then hopefully that fixes the scrolling issue and then just finishing up the scrolling imo with the bar then wagwan big bosh
-        print(f"{self.player_undo = }")
-
         undo_item_id = list(self.player_undo.keys())[0]
         undo_item_dictionary = list(self.player_undo.values())[0]
-        # print(f"{undo_item_dictionary = }, {undo_item_id = }")
         self.player.player_inventory[undo_item_id] = undo_item_dictionary
         if self.last_undo_action == "p>d": # if you've just done a player delete action you've invalidated any lootable undo *if* you had placed a loot from the lootable to your inventory
             self.last_undo_action = False # always gets reset once the undo is complete (as the last action was simply an undo)
@@ -483,6 +617,69 @@ class Game:
         text_rect = text_surface.get_rect(**{"topleft": (x, y)})
         self.screen.blit(text_surface, text_rect)
 
+    # [ CRIT! ] - again if you're going to keep this functionality 100% refactor so this *just* loads the map, duhhhhhh
+    def play_map_2(self):
+        # initialize all variables and do all the setup for a new game
+        self.all_map_lootables = {} # includes loot details for each lootable
+        self.all_sprites = pg.sprite.LayeredUpdates()
+        # -- sprite groups --
+        self.walls = pg.sprite.Group()
+        self.zombies = pg.sprite.Group()
+        self.bullets = pg.sprite.Group()
+        self.items = pg.sprite.Group()
+        self.lootables = pg.sprite.Group()
+        self.menus = pg.sprite.Group()
+        self.minimaps = pg.sprite.Group()
+        # quick test
+        self.menuables = pg.sprite.Group()
+        self.workbenches = pg.sprite.Group()
+        self.delivery_lockers = pg.sprite.Group()
+        # -- current level map setup -- 
+        self.map = TiledMap(path.join(self.map_folder, 'level1.tmx'))
+        self.map_img = self.map.make_map()
+        self.map.rect = self.map_img.get_rect()
+        # -- for minimap --
+        self.all_lootable_positions = [] # grab these now for the minimap so we do it once using this setup loop otherwise we would have to do it per frame
+        # -- parse all the tiles in the tilemap file and initialise new objects and images -- 
+        for tile_object in self.map.tmxdata.objects:
+            obj_center = vec(tile_object.x + tile_object.width / 2,
+                             tile_object.y + tile_object.height / 2)
+            if tile_object.name == 'player':
+                self.player = Player(self, obj_center.x, obj_center.y)
+            if tile_object.name == 'zombie':
+                Zombie(self, obj_center.x, obj_center.y)
+            if tile_object.name == 'wall':
+                Obstacle(self, tile_object.x, tile_object.y,
+                         tile_object.width, tile_object.height)
+            if tile_object.name in ['health', 'shotgun']:
+                Item(self, obj_center, tile_object.name)
+            if tile_object.name == 'lootable_box_small': 
+                Lootable(self, obj_center.x, obj_center.y, tile_object.name)
+                self.all_lootable_positions.append((obj_center.x, obj_center.y))
+            if tile_object.name == 'workbench': 
+                Workbench(self, obj_center.x, obj_center.y)
+        # -- camera --         
+        self.camera = Camera(self.map.width, self.map.height)
+        # -- general -- 
+        self.paused = False
+        self.night = False
+        if self.game_volume > 0.0:
+            self.effects_sounds['level_start'].play()
+        # -- minimap x gui setup --
+        self.mobile_minimap = Mobile_Minimap(self)    
+        # -- for potential addition --
+        self.player_battery_level = 100 # would go for percent ig
+        # -- misc --
+        self.current_lock_time = 0 # needs to be initialised before starting
+        self.player_undo = {} # stores the last thing you removed from the players inventory for undo # player_inventory_undo
+        self.lootable_undo = {} # stores the last thing you removed from the lootable inventory for undo # lootable_inventory_undo
+        self.last_undo_action = False # stores the last undo action (e.g. inventory->delete, lootable->inventory, etc) the player did as a string
+        self.player_threw_gold = False # for faux achievement else would move to player class, not intending on expanding this passed 1 or 2 more than this
+        self.cheevo_counter = 0 # wanna replace this for just a close button on the achievement, for now its just a faux timer
+        self.achievement_unlocks = False
+        self.scroll_offset = 0 # so the scrolling can persist as our menu object is created after runtime as its super lightweight 
+        self.true_check_mouse_click = False
+
 
 # HUD functions
 def draw_player_health(surf, x, y, pct):
@@ -507,7 +704,14 @@ def draw_player_health(surf, x, y, pct):
 g = Game()
 g.show_start_screen()
 while True:
-    g.new()
-    g.run()
-    g.show_go_screen()
+    if g.current_level == 1: 
+        g.play_map_1()
+        g.run()
+        if not g.change_level:
+            g.show_go_screen()
+    else:
+        g.play_map_2()
+        g.run()
+        if not g.change_level:
+            g.show_go_screen()
 
